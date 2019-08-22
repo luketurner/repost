@@ -1,0 +1,33 @@
+{
+  "name": "repost",
+  "version": "0.1.0",
+  "description": "Low-friction, automation-friendly HTTP testing in the terminal",
+  "main": "index.js",
+  "bin": "bin/repost.js",
+  "scripts": {
+    "cli": "node bin/repost.js",
+    "debug": "node --inspect-brk bin/repost.js",
+    "test": "mocha --exit 'test/**/*.spec.js'"
+  },
+  "files": [
+    "src",
+    "bin"
+  ],
+  "author": "Luke Turner",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "command-line-args": "^5.1.1",
+    "command-line-usage": "^6.0.2",
+    "ejs": "^2.6.1"
+  },
+  "devDependencies": {
+    "axios-mock-adapter": "^1.17.0",
+    "chai": "^4.2.0",
+    "express": "^4.16.3",
+    "mocha": "^6.1.4",
+    "mock-fs": "^4.10.1",
+    "sinon": "^7.3.2",
+    "sinon-chai": "^3.3.0"
+  }
+}
