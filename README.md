@@ -70,7 +70,7 @@ Base Options
 The public API exposes two functions:
 
 - `repost.newSession(config)`: Creates and returns a new `repost` session using the given configuration. Sessions provide the core API for interacting with `repost`. See [Session API](#Session_API) below.
-- `repost.cli()`: Executes the CLI application using the current process cwd, argv, and stdin/stdout. Returns a promise the resolves once execution is complete.
+- `repost.cli(argv?)`: Executes the CLI application using the current process cwd, stdin/stdout, and argv (which can be overridden with the optional `argv` parameter). Returns a promise that resolves once execution is complete.
 
 ```js
 // Create a new session and use it to run a request.
@@ -83,7 +83,7 @@ const { err, response } = await session.run("./my-test-file.http");
 
 ### Session API
 
-Repost functionality is accessed using a _session object_, like that returned by `newSession()`. The same session object is available to user-written hooks and request builders.
+Repost functionality is accessed using a **session object**, like that returned by `newSession()`. The same session object is available to user-written hooks and request builders.
 
 Session objects expose the following API:
 
@@ -106,7 +106,9 @@ Requests are preprocessed with EJS, allowing full use of Javascript when definin
 
 Within the EJS template, you have access to the `session` object. Additionally, all environment variables can be referenced as global variables or via the `env` object.
 
-> **Note** `.js` requests are not pre-processed, but are executed with the same variables in scope. There is one exception -- `.js` scripts only expose environment variables within the global `env` object, not as individual global variables.
+EJS templates are executed asynchronously, meaning you can use the `await` keyword within your templated code. e.g. `<%= await get_token() %>`
+
+> **Note** Requests with the `.js` extension are not pre-processed, but are executed with the same variables in scope. (However, within a JS test, env vars are only available as properties on the global `env` object, not as individual global variables.)
 
 ## Custom JS Requests
 
