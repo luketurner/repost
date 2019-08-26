@@ -47,17 +47,17 @@ module.exports = session => {
     const oldEnv = await getEnvJSON(envName);
     const newEnv = Object.assign(oldEnv, patch);
     await util.writeFile(envName, JSON.stringify(newEnv, null, 2));
+    return newEnv;
   };
 
-  const getEnvForRequest = test => getEnv(getEnvLocationForRequest(test));
-  const patchEnvForRequest = (test, patch) =>
-    patchEnv(getEnvLocationForRequest(test), patch);
+  const getEnvForRequest = request => getEnv(getEnvLocationForRequest(request));
+  const patchEnvForRequest = (request, patch) =>
+    patchEnv(getEnvLocationForRequest(request), patch);
 
   return {
     getEnv,
-    getEnvForRequest
-    // TODO -- finish implementing and testing these
-    // patchEnv,
-    // patchEnvForRequest
+    getEnvForRequest,
+    patchEnv,
+    patchEnvForRequest
   };
 };
