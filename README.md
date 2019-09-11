@@ -91,16 +91,20 @@ Session objects expose the following API:
 - `session.envs`: Provides access to `getEnv(envFilename)` for looking up environments, and `getEnvForRequest(requestFilename)` for resolving which environment should be used for a given test.
 - `session.util`: Namespace that provides a variety of utility functions, mostly for use in async hooks. Includes: `readFile` - `writeFile` - `sendHTTPRequest` - `sleep`
 
-# Advanced Usage
-
 ## Request Types
 
 A "request" is a file that contains a description of an HTTP request. Requests are interpreted according to their extension, as follows:
 
-- `.http` - interpreted as an HTTP request(-ish) with EJS interpolation.
+- `.http` - interpreted as a raw HTTP request.
 - `.js` - interpreted as a JS module that dynamically defines the request.
 
-## EJS Interpolation
+### HTTP Request Files
+
+HTTP request files are expected to follow the [HTTP request spec](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html).
+
+If you are using VS Code, the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension offers syntax highlighting and in-editor support for executing requests. However, it uses a different structure for enviornment variables which is incompatible with `repost`, so only simple requests can be shared by both clients.
+
+### EJS Interpolation
 
 Requests are preprocessed with EJS, allowing full use of Javascript when defining them. One important usage of EJS is to inject environment variables into the tests with `<%= my_var %>`. However, more advanced usage is possible (and recommended!)
 
@@ -110,7 +114,7 @@ EJS templates are executed asynchronously, meaning you can use the `await` keywo
 
 > **Note** Requests with the `.js` extension are not pre-processed, but are executed with the same variables in scope. (However, within a JS test, env vars are only available as properties on the global `env` object, not as individual global variables.)
 
-## Custom JS Requests
+## JS Request Files
 
 Requests ending in `.js` will be executed as Node modules. This allows maximum request customization, including the ability to execute non-HTTP requests using the `handler()` function.
 
