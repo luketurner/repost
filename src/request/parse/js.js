@@ -1,4 +1,4 @@
-const util = require("../util");
+const util = require("../../util");
 
 const parse = async (fileContents, scriptContext) => {
   const result = await util.eval(fileContents, scriptContext);

@@ -1,7 +1,7 @@
 const expect = require("chai").expect;
 const sinon = require("sinon");
 require("chai").use(require("sinon-chai"));
-const parser = require("../../../src/request-parser/js");
+const parser = require("../../../../src/request/parse/js");
 
 describe("module: request-parser/js", () => {
   describe("parse()", () => {

@@ -4,7 +4,7 @@ const path = require("path");
 module.exports = session => {
   const runRequestsAndCollections = async (...requestsAndCollections) => {
     const responses = await Promise.all(
-      requestsAndCollections.map(runRequestOrCollection)
+      requestsAndCollections.map(v => runRequestOrCollection(v))
     );
 
     return [].concat(...responses);
@@ -12,7 +12,7 @@ module.exports = session => {
 
   const runRequestOrCollection = async (
     requestOrCollection,
-    { skipUnknown }
+    { skipUnknown } = {}
   ) => {
     // TODO -- get rid of skipUknown param
     try {
@@ -49,7 +49,7 @@ module.exports = session => {
     try {
       session.log.silly(`runRequest(${request})`);
       const [preTransformRequest, testHooks] = await Promise.all([
-        session.parser.parseTestFile(request),
+        session.request.parse(request),
         session.hooks.getTestHooks(request)
       ]);
 

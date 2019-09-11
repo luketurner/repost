@@ -1,7 +1,7 @@
 const makeLog = require("./log");
 const makeEnvs = require("./envs");
 const makeHooks = require("./hooks");
-const makeParser = require("./request-parser");
+const makeRequest = require("./request");
 const makeRun = require("./run");
 const util = require("./util");
 
@@ -34,7 +34,7 @@ const newSession = config => {
   session.log = makeLog(session);
   session.envs = makeEnvs(session);
   session.hooks = makeHooks(session);
-  session.parser = makeParser(session);
+  session.request = makeRequest(session);
   session.run = makeRun(session);
 
   return session;
