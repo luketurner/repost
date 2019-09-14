@@ -71,4 +71,4 @@ const parse = httpRequest => {
   };
 };
 
-module.exports = { parse };
+module.exports = parse;
