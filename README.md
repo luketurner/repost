@@ -2,9 +2,9 @@
 
 Low-friction, high-scriptability HTTP testing in the terminal. Inspired by Postman -- yet ultimately, very different.
 
-> **WARNING:** `repost` is under heavy development and some use-cases documented in this README have not been implemented yet.
-
 The goal of `repost` is that all workflows -- no matter how complex -- can be fully automated.
+
+> **WARNING:** `repost` is under heavy development and some use-cases documented in this README have not been implemented yet.
 
 Key differences from Postman:
 
@@ -116,11 +116,22 @@ EJS templates are executed asynchronously, meaning you can use the `await` keywo
 
 ## JS Request Files
 
-Requests ending in `.js` will be executed as Node modules. This allows maximum request customization, including the ability to execute non-HTTP requests using the `handler()` function.
+Requests ending in `.js` will be executed as Node modules. This allows maximum request customization, including the ability to execute non-HTTP requests.
 
-Custom JS requests are CommonJS modules that must export (using `module.exports`) the object representing the request they want to execute. The request object will be passed more-or-less directly to Axios, so all Axios request parameters are supported.
+Custom JS requests are CommonJS modules that must export (using `module.exports`) an object with a `handler()` method that defines arbitrary request execution. The `handler` function is executed asynchronously, and expected to return a `Promise<string>` that represents the response data to be displayed to the user.
 
-Alternatively, the exported object can have a `handler()` method that defines arbitrary request execution. The `handler` function is executed asynchronously, and expected to return a `Promise<string>` that represents the response data to be displayed to the user.
+```js
+// foo.js
+
+module.exports = {
+  async handler() {
+    return {
+      method: "GET",
+      url: "http://localhost:8000"
+    };
+  }
+};
+```
 
 ## Hooks
 
@@ -155,14 +166,23 @@ module.exports = {
   async after(response) {
     // ...
   },
+  async handler() {
+    return {
   method: "GET",
   url: "http://localhost:8000"
+};
+  }
 };
 ```
 
 ## Environments
 
-Think of enviroments as tiny key/value stores that provide shared state for your requests. They define values for variables (e.g. `base_url` or `access_token`) that can be reused across requests.
+`repost` "environments" are tiny key/value stores that provide shared state for your requests. They define values for variables (e.g. `base_url` or `access_token`) that can be reused across requests.
+
+Environments can be used for:
+
+1. Sharing a single value across multiple requests.
+2. Providing a persistent store for data when executing hooks or custom requests.
 
 In `repost`, an environment is defined by a `*.env.json` file. For example, you can define the `base_url` variable:
 
