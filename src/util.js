@@ -11,6 +11,7 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const statFile = promisify(fs.stat);
 const readDir = promisify(fs.readdir);
+const mkdir = promisify(fs.mkdir);
 
 const _accessFile = promisify(fs.access);
 const accessFile = async (...args) => {
@@ -79,6 +80,7 @@ module.exports = {
   statFile,
   watchFile,
   readDir,
+  mkdir,
   accessFile,
   eval,
   ejs,
