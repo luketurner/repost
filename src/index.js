@@ -1,3 +1,4 @@
+const makeCollection = require("./collection");
 const makeLog = require("./log");
 const makeEnvs = require("./envs");
 const makeHooks = require("./hooks");
@@ -32,6 +33,7 @@ const newSession = config => {
   // Modules must be instantiated in specific order based on internal coupling. Should be fixed
   session.util = util;
   session.log = makeLog(session);
+  session.collection = makeCollection(session);
   session.envs = makeEnvs(session);
   session.hooks = makeHooks(session);
   session.request = makeRequest(session);
