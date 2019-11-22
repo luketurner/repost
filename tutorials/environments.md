@@ -21,7 +21,13 @@ For example, you can define the `base_url` variable:
 
 By default, the `repost` CLI uses the `./default.env.json` environment, if it exists. Otherwise, a temporary environment with no variables is used (and is not persisted to disk). This behavior can be overridden with the `-e/--env` command-line flag.
 
-### Computed variables
+## Using Variables
+
+The current environment's variables are available in all user code (hooks, EJS, etc.) in the global `env` object. As a user of the Repost API, you can access them at {#link RepostContext#env}.
+
+The properties of the `env` object can also be modified by user code. Any changes to the `env` object are automatically persisted back to the `.env.json` file.
+
+## Computed variables
 
 In addition to `*.env.json` files, environments can have "computed variables" defined in `*.env.js` files.
 
