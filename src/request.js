@@ -1,4 +1,5 @@
 const util = require("./util");
+const path = require("path");
 /**
  * @module repost/request
  */
@@ -76,9 +77,10 @@ function requestFactory(ctx) {
      * @memberof FileRequestRunner#
      */
     async isRequest(filename) {
-      // TODO -- filter out everything with an unsupported extension.
-
-      return !(await ctx.hooks.isHookFile(filename));
+      if (ctx.envs.isEnvFile(filename)) return false;
+      if (await ctx.hooks.isHookFile(filename)) return false;
+      if (ctx.format.isSupportedExtension(path.extname(filename))) return true;
+      return false;
     }
   };
 

@@ -51,6 +51,15 @@ function formatFactory(ctx) {
       if (!requestObject.handler) requestObject.handler = util.sendHTTPRequest;
 
       return requestObject;
+    },
+
+    isSupportedExtension(ext) {
+      for (const fmt of Object.keys(FORMATS)) {
+        if (FORMATS[fmt].config.extensions.includes(ext)) {
+          return true;
+        }
+      }
+      return false;
     }
   };
 

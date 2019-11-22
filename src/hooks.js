@@ -69,6 +69,8 @@ function hookFactory(ctx) {
       const ext = path.extname(filename);
       if (ext !== ".js") return false;
 
+      if (ctx.envs.isEnvFile(filename)) return false;
+
       const basename = path.basename(filename, ext);
       const basename_with_ext = path.basename(filename);
 
