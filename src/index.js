@@ -8,8 +8,8 @@ const { loggerFactory } = require("./log");
 const { runnerFactory } = require("./run");
 const { formatFactory } = require("./format");
 const { hookFactory } = require("./hooks");
-const { getEnvironmentProxy } = require("./env");
 const { requestFactory } = require("./request");
+const { envsFactory } = require("./env");
 
 /**
  * @module repost
@@ -106,7 +106,10 @@ async function createContext(config) {
   ctx.collection = collectionFactory(ctx);
   ctx.request = requestFactory(ctx);
   ctx.run = runnerFactory(ctx);
-  ctx.env = config.env ? await getEnvironmentProxy(config.env, ctx) : {};
+  ctx.envs = envsFactory(ctx);
+  ctx.env = config.env
+    ? await ctx.envs.getEnvironmentProxy(config.env, ctx)
+    : {};
 
   return ctx;
 }

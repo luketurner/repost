@@ -7,97 +7,121 @@ const _ = require("lodash");
 const DEFAULT_ENVIRONMENT = "default.env.json";
 
 /**
- * @module env
- * @private
+ * @module repost/env
  */
 module.exports = {
-  resolveEnvironment,
-  getEnvironmentProxy,
-  getEnvironment
+  envsFactory
 };
 
-async function resolveEnvironment(requestFile) {
-  // TODO -- this logic is incomplete, should walk parent directories too.
-  const dirname = path.dirname(requestFile);
-  const envFilename = path.join(dirname, DEFAULT_ENVIRONMENT);
-  if (await util.accessFile(envFilename)) {
-    return envFilename;
-  }
+/**
+ * Factory function for EnvLoader.
+ *
+ * @param {RepostContext} ctx
+ * @returns {EnvLoader}
+ */
+function envsFactory(ctx) {
+  /**
+   * @interface EnvLoader
+   */
+  const self = {
+    /**
+     * Indicates whether `filename` is an environment file.
+     *
+     * Unlike other functions, this will not attempt to append `.env.json`
+     * to `filename` if it is missng.
+     *
+     * @param {*} filename
+     * @returns {boolean}
+     */
+    isEnvFile(filename) {
+      return filename.endsWith(".env.js") || filename.endsWith(".env.json");
+    },
 
-  return null;
-}
-
-async function getEnvironmentProxy(envName, context) {
-  const persist = _.throttle(target => {
-    write(envName, JSON.stringify(target, null, 2));
-  }, 100);
-  return new Proxy(await getEnvironment(envName, context), {
-    set(target, property, value, receiver) {
-      // TODO -- add validation that things like functions aren't being added
-
-      // asynchronously persist changes (props starting with __ are ignored for internal usage)
-      if (!property.toString().startsWith("__")) {
-        persist(target);
+    async resolveEnvironment(requestFile) {
+      // TODO -- this logic is incomplete, should walk parent directories too.
+      const dirname = path.dirname(requestFile);
+      const envFilename = path.join(dirname, DEFAULT_ENVIRONMENT);
+      if (await util.accessFile(envFilename)) {
+        return envFilename;
       }
 
-      return Reflect.set(target, property, value, receiver);
+      return null;
+    },
+
+    async getEnvironmentProxy(envName, context) {
+      const persist = _.throttle(target => {
+        self.write(envName, JSON.stringify(target, null, 2));
+      }, 100);
+      return new Proxy(await self.getEnvironment(envName, context), {
+        set(target, property, value, receiver) {
+          // TODO -- add validation that things like functions aren't being added
+
+          // asynchronously persist changes (props starting with __ are ignored for internal usage)
+          if (!property.toString().startsWith("__")) {
+            persist(target);
+          }
+
+          return Reflect.set(target, property, value, receiver);
+        }
+      });
+    },
+
+    async getEnvironment(envName, context) {
+      return {
+        ...(await self.getComputedVariables(envName, context)),
+        ...(await self.getRawVariables(envName))
+      };
+    },
+
+    async getComputedVariables(envName, context) {
+      if (envName.endsWith(".env.json")) {
+        envName = envName.slice(0, -2);
+      }
+
+      if (!envName.endsWith(".env.js")) {
+        envName += ".env.js";
+      }
+
+      try {
+        const code = await util.readFile(envName, "utf8");
+        if (!code) return {};
+        return await context.evalModule(code);
+      } catch (err) {
+        if (err.code === "ENOENT") return null;
+        else throw err;
+      }
+    },
+
+    async getRawVariables(envName) {
+      if (!envName.endsWith(".env.json")) {
+        envName += ".env.json";
+      }
+
+      try {
+        const json = await util.readFile(envName, "utf8");
+        const env = JSON.parse(json);
+        if (env === null || typeof env !== "object") return {};
+        return env;
+      } catch (err) {
+        if (err.code === "ENOENT") return {};
+        else throw err;
+      }
+    },
+
+    async write(envName, envObject) {
+      return util.writeFile(envName, JSON.stringify(envObject, null, 2));
+    },
+
+    async patch(envName, patchObject) {
+      const newEnv = {
+        ...(await self.getRawVariables(envName)),
+        ...patchObject
+      };
+      await self.write(envName, newEnv);
+      return newEnv;
     }
-  });
-}
-
-async function getEnvironment(envName, context) {
-  return {
-    ...(await getComputedVariables(envName, context)),
-    ...(await getRawVariables(envName))
   };
-}
-
-async function getComputedVariables(envName, context) {
-  if (envName.endsWith(".env.json")) {
-    envName = envName.slice(0, -2);
-  }
-
-  if (!envName.endsWith(".env.js")) {
-    envName += ".env.js";
-  }
-
-  try {
-    const code = await util.readFile(envName, "utf8");
-    if (!code) return {};
-    return await context.evalModule(code);
-  } catch (err) {
-    if (err.code === "ENOENT") return null;
-    else throw err;
-  }
-}
-
-async function getRawVariables(envName) {
-  if (!envName.endsWith(".env.json")) {
-    envName += ".env.json";
-  }
-
-  try {
-    const json = await util.readFile(envName, "utf8");
-    const env = JSON.parse(json);
-    if (env === null || typeof env !== "object") return {};
-    return env;
-  } catch (err) {
-    if (err.code === "ENOENT") return {};
-    else throw err;
-  }
-}
-
-async function write(envName, envObject) {
-  return util.writeFile(envName, JSON.stringify(envObject, null, 2));
-}
-
-async function patch(envName, patchObject) {
-  const newEnv = {
-    ...(await getRawVariables(envName)),
-    ...patchObject
-  };
-  await write(envName, newEnv);
-  return newEnv;
+  return self;
 }
 
 // module.exports = session => {
