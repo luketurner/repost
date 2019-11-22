@@ -1,6 +1,6 @@
 # Repost
 
-> **Github Reader Note:** This README includes links to other parts of the Repost documentation. These links won't work when viewing the README in Github -- check out the [hosted docs](https://luketurner.repost).
+> **Github Reader Note:** This README includes links to other parts of the Repost documentation. These links won't work when viewing the README in Github -- check out the [hosted docs](https://luketurner.org/repost).
 
 > **WARNING:** `repost` is an experimental project, not intended for production use. Use at your own risk!
 
