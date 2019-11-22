@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Tutorial: microservice-testing</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Tutorial: microservice-testing</h1>
+
+    <section>
+
+<header>
+    
+
+    <h2>microservice-testing</h2>
+</header>
+
+<article>
+    <p>Let's discuss one of the core use-cases for <code>repost</code> -- microservice testing.</p>
+<p>To be more specific, assume we have a variety of services -- dozens of 'em -- and they all have different hostnames, different authentication, etc.</p>
+<p>Also, all of these services are running in a variety of environments -- they might be running locally, or in a Dockerized environment, or in staging, etc.</p>
+<p>For this scenario, assume we care about three microservices (svc-A, svc-B, and svc-C), and two environments: &quot;local&quot; and &quot;staging&quot;.</p>
+<p>So, we have this matrix of &quot;test suites&quot;:</p>
+<pre class="prettyprint source"><code>          local         staging
+  svc-A    svc-A-local    svc-A-staging
+  svc-B    svc-B-local    svc-B-staging
+  svc-C    svc-C-local    svc-C-staging
+</code></pre>
+<p>Our goal is to be able to concisely execute any of those test suites with a single command.</p>
+<p>Of course, if we write a test request for svc-A, we want to be able to use that same request for svc-A-local testing as well as us-A-staging testing.</p>
+<p>Let's see how we can accomplish this with <code>repost</code>.</p>
+<p>First, we want to create collections to house our requests. In this case, we want one collection per service.</p>
+<p>While we could put all those collections in a single place, it often makes sense to put each service's collection &quot;into the service&quot;, e.g. by putting it in the service's Git repository. This way, all the service's developers can collaborate on a shared corpus of test requests.</p>
+<p>For this scenario, we'll pretend to &quot;check out&quot; services by simply creating empty directories:</p>
+<pre class="prettyprint source lang-bash"><code># In real life, these would be &quot;git clone&quot; commands
+git init svc-A
+git init svc-B
+git init svc-C
+</code></pre>
+<p>Then, we can create a <code>requests</code> folder in each Git repository to hold our Repost collections.</p>
+<p>Because Repost uses a hidden <code>.repost-collection</code> indicator file to detect collections, it also provides a <code>repost create collection</code> command that should be used to create collections:</p>
+<pre class="prettyprint source lang-bash"><code>repost create collection svc-A/requests
+repost create collection svc-B/requests
+repost create collection svc-C/requests
+</code></pre>
+<p>That gives us the following file structure:</p>
+<pre class="prettyprint source"><code>svc-A/
+  requests/
+    .repost-collection
+svc-B/
+  requests/
+    .repost-collection
+svc-C/
+  requests/
+    .repost-collection
+</code></pre>
+<p>Next, we want to create our environments. The services are too different to share environments between them, so we'll create a <code>local</code> and <code>staging</code> environment for each service:</p>
+<pre class="prettyprint source lang-bash"><code>repost create env svc-A/requests/local
+repost create env svc-A/requests/staging
+repost create env svc-B/requests/local
+repost create env svc-B/requests/staging
+repost create env svc-C/requests/local
+repost create env svc-C/requests/staging
+</code></pre>
+<p>This is getting a bit repetitive because of how many services we're trying to build out at once, but normally you won't have to create this many environments at the same time -- you can incrementally create and define environments as you develop new services.</p>
+<p>Our new file structure is:</p>
+<pre class="prettyprint source"><code>svc-A/
+  requests/
+    .repost-collection
+    local.env.json
+    staging.env.json
+svc-B/
+  requests/
+    .repost-collection
+    local.env.json
+    staging.env.json
+svc-C/
+  requests/
+    .repost-collection
+    local.env.json
+    staging.env.json
+</code></pre>
+<p>Next, we can start to configure the environments and create requests. For brevity, let's focus on working with a single service.</p>
+</article>
+
+</section>
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-repost.html">repost</a></li><li><a href="module-repost_env.html">repost/env</a></li><li><a href="module-repost_hooks.html">repost/hooks</a></li><li><a href="module-repost_log.html">repost/log</a></li><li><a href="module-repost_request.html">repost/request</a></li><li><a href="module-repost_run.html">repost/run</a></li><li><a href="module-repost_util.html">repost/util</a></li></ul><h3>Interfaces</h3><ul><li><a href="CollectionHelper.html">CollectionHelper</a></li><li><a href="FileRequestRunner.html">FileRequestRunner</a></li><li><a href="Hooks.html">Hooks</a></li><li><a href="JSHookLoader.html">JSHookLoader</a></li><li><a href="Logger.html">Logger</a></li><li><a href="module-repost_env-EnvLoader.html">EnvLoader</a></li><li><a href="RepostConfig.html">RepostConfig</a></li><li><a href="RepostContext.html">RepostContext</a></li><li><a href="TryRunResponse.html">TryRunResponse</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-collections.html">collections</a></li><li><a href="tutorial-ejs-interpolation.html">ejs-interpolation</a></li><li><a href="tutorial-environments.html">environments</a></li><li><a href="tutorial-getting-started-cli.html">getting-started-cli</a></li><li><a href="tutorial-getting-started-library.html">getting-started-library</a></li><li><a href="tutorial-hooks_.html">hooks</a></li><li><a href="tutorial-http-request-format.html">http-request-format</a></li><li><a href="tutorial-js-request-format.html">js-request-format</a></li><li><a href="tutorial-microservice-testing.html">microservice-testing</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Nov 22 2019 11:32:35 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
