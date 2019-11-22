@@ -23,15 +23,6 @@ const accessFile = async (...args) => {
   }
 };
 
-const eval = (string, context) => {
-  const sandboxModule = { exports: {} };
-  const result = vm.runInNewContext(string, {
-    module: sandboxModule,
-    ...context
-  });
-  return sandboxModule.exports;
-};
-
 const getExecutionContext = (env, session, testContext) => {
   return { ...env, repost: session, test: testContext };
 };
@@ -61,7 +52,7 @@ const awaitProps = async object => {
 };
 
 const replaceExtension = (filename, newExt) => {
-  return filename.replace(/\.[^.]+?$/, newExt ? `.${newExt}` : "");
+  return filename.replace(/\.[^.]+?$/, newExt ? `${newExt}` : "");
 };
 
 const watchFile = (filename, fn) => {
@@ -74,6 +65,9 @@ const sendHTTPRequest = async request => {
 
 const sleep = promisify(setTimeout);
 
+/**
+ * @module repost/util
+ */
 module.exports = {
   readFile,
   writeFile,
@@ -82,7 +76,6 @@ module.exports = {
   readDir,
   mkdir,
   accessFile,
-  eval,
   ejs,
   regexGroups,
   awaitProps,

@@ -1,13 +1,9 @@
 const parseArgs = require("command-line-args");
 
-const { newSession } = require("..");
+const { createContext } = require("..");
 const BASE_OPTIONS = require("./options");
 const COMMANDS = require("./commands");
 const getHelp = require("./help");
-
-const createCLISession = args => {
-  return newSession(args);
-};
 
 const parseBaseArgs = argv => {
   const args = parseArgs(BASE_OPTIONS, {
@@ -47,6 +43,8 @@ module.exports = async rawArgv => {
 
   const handler = getCommandHandler(command);
   const args = parseCommandArgs(command, baseArgs._unknown || []);
-  const commandSession = createCLISession(baseArgs);
-  return await handler(commandSession, { ...baseArgs, ...args });
+
+  const context = await createContext(args);
+
+  return await handler(context, { ...baseArgs, ...args });
 };

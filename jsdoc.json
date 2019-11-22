@@ -1,0 +1,12 @@
+{
+  "source": {
+    "include": ["src"]
+  },
+  "opts": {
+    "destination": "./docs",
+    "recurse": true,
+    "tutorials": "./tutorials",
+    "readme": "./README.md"
+  },
+  "plugins": ["plugins/markdown"]
+}

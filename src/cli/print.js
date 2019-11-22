@@ -11,8 +11,8 @@ const httpResponse = response => {
 
 const httpResponseList = responseList => {
   return responseList
-    .map(({ err, response, request }) => {
-      return `\n--- ${request} ---\n${err || httpResponse(response)}`;
+    .map(({ error, response, request }) => {
+      return `\n--- ${request} ---\n${error || httpResponse(response)}`;
     })
     .join("\n");
 };

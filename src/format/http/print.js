@@ -1,4 +1,5 @@
-module.exports = ({ url, method, data, headers }) => {
+module.exports = (ctx, request) => {
+  const { url, method, data, headers } = request;
   const headerString =
     Object.keys(headers).length > 0
       ? Object.keys(headers)

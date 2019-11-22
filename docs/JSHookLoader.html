@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Interface: JSHookLoader</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Interface: JSHookLoader</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>JSHookLoader</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>The JSHookLoader contains logic for loading hooks from JS &quot;hook files.&quot;</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="hooks.js.html">hooks.js</a>, <a href="hooks.js.html#line25">line 25</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="isHookFile"><span class="type-signature"></span>isHookFile<span class="signature">(filename)</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Tries to determine whether <code>filename</code> is a hooks file.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>filename</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="hooks.js.html">hooks.js</a>, <a href="hooks.js.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;boolean></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="loadHooks"><span class="type-signature"></span>loadHooks<span class="signature">(filename)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Hooks.html">Hooks</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Loads the hooks given in <code>filename</code> within the loader's RepostContext. Returns an object with the before and after functions.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>filename</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="hooks.js.html">hooks.js</a>, <a href="hooks.js.html#line39">line 39</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Hooks.html">Hooks</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-repost.html">repost</a></li><li><a href="module-repost_hooks.html">repost/hooks</a></li><li><a href="module-repost_log.html">repost/log</a></li><li><a href="module-repost_request.html">repost/request</a></li><li><a href="module-repost_run.html">repost/run</a></li><li><a href="module-repost_util.html">repost/util</a></li></ul><h3>Interfaces</h3><ul><li><a href="CollectionHelper.html">CollectionHelper</a></li><li><a href="FileRequestRunner.html">FileRequestRunner</a></li><li><a href="Hooks.html">Hooks</a></li><li><a href="JSHookLoader.html">JSHookLoader</a></li><li><a href="Logger.html">Logger</a></li><li><a href="RepostConfig.html">RepostConfig</a></li><li><a href="RepostContext.html">RepostContext</a></li><li><a href="TryRunResponse.html">TryRunResponse</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-collections.html">collections</a></li><li><a href="tutorial-ejs-interpolation.html">ejs-interpolation</a></li><li><a href="tutorial-environments.html">environments</a></li><li><a href="tutorial-getting-started-cli.html">getting-started-cli</a></li><li><a href="tutorial-getting-started-library.html">getting-started-library</a></li><li><a href="tutorial-hooks_.html">hooks</a></li><li><a href="tutorial-http-request-format.html">http-request-format</a></li><li><a href="tutorial-js-request-format.html">js-request-format</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Nov 22 2019 08:42:33 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

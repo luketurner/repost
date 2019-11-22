@@ -14,5 +14,7 @@ This example uses `repost` Environments to achieve the desired logic, as follows
 ## Usage
 
 ```
-repost run examples/authentication/request.http
+cd example/authentication
+
+repost run request.http
 ```

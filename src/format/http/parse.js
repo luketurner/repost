@@ -43,7 +43,7 @@ const parseBody = body => {
   return { data: body }; // easy?!
 };
 
-const parse = httpRequest => {
+const parse = (ctx, httpRequest) => {
   httpRequest = httpRequest.replace(/\r\n/g, "\n"); // Convert newlines to consistent format in case requests come from windows
 
   const headerStartIndex = httpRequest.indexOf("\n") + 1;

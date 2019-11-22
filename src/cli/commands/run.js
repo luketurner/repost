@@ -15,14 +15,14 @@ module.exports = {
       alias: "e",
       type: String,
       description: "The environment file to use",
-      defaultValue: "default.env.js"
+      defaultValue: "default.env.json"
     }
   ],
-  handler: async (session, args) => {
+  handler: async (ctx, args) => {
     const { file } = args;
 
-    const responses = await session.run(...file);
-    if (responses) session.log.info(print.httpResponseList(responses));
-    else session.log.info("No files specified.");
+    const responses = await ctx.run(file);
+    if (responses) ctx.log.info(print.httpResponseList(responses));
+    else ctx.log.info("No files specified.");
   }
 };

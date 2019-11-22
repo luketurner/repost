@@ -1,7 +1,7 @@
 const expect = require("chai").expect;
 const sinon = require("sinon");
 require("chai").use(require("sinon-chai"));
-const makeEnv = require("../../src/envs");
+const makeEnv = require("../../src/env");
 const util = require("../../src/util");
 
 const { mockFilesystem, mockSession } = require("../test-helper");

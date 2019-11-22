@@ -1,5 +1,5 @@
 const commandLineUsage = require("command-line-usage");
-const package = require("../../package.json");
+const packageJson = require("../../package.json");
 
 const COMMANDS = require("./commands");
 const BASE_OPTIONS = require("./options");
@@ -18,7 +18,7 @@ const getCommandOptions = cmd => ({
 });
 
 const getCommandHelp = cmd => ({
-  header: `${package.name} ${cmd}`,
+  header: `${packageJson.name} ${cmd}`,
   content: COMMANDS[cmd].description
 });
 
@@ -33,8 +33,8 @@ const getExamples = () => ({
 });
 
 const getDescription = () => ({
-  header: package.name,
-  content: package.description
+  header: packageJson.name,
+  content: packageJson.description
 });
 
 const getOptionsHelp = () => ({
