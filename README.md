@@ -27,6 +27,35 @@ repost --help
 
 For more information, consult {@tutorial getting-started-cli} or {@tutorial getting-started-library}
 
+# Development
+
+This section is for those trying to make changes to Repost itself.
+
+For starters, you need to clone the Git directory:
+
+```bash
+git clone https://github.com/luketurner/repost.git
+```
+
+Then install npm dependencies:
+
+```bash
+npm i
+```
+
+Repost exposes its development commands as `npm` scripts. The following scripts are available:
+
+```bash
+npm run cli         # runs the repost CLI
+npm run debug       # Runs the repost CLI with --inspect-brk
+
+npm run test        # Runs the repost test suite
+
+npm run docs        # Builds the docs
+npm run docs:serve  # Builds the docs and serves on localhost:8080
+npm run docs:watch  # like docs:serve, but automatically rebuilds on file changes
+```
+
 ---
 
 Copyright 2019 Luke Turner - Published under the MIT License.
