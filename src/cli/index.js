@@ -74,7 +74,7 @@ const withConsole = async (capture = false, fn) => {
 };
 
 module.exports = async (rawArgv, config) => {
-  const { captureOutput = false } = config || {};
+  const { captureOutput = false, context = undefined } = config || {};
 
   return await withConsole(captureOutput, async console => {
     const baseArgs = parseBaseArgs(rawArgv);
@@ -89,12 +89,19 @@ module.exports = async (rawArgv, config) => {
     const handler = getCommandHandler(command);
     const args = parseCommandArgs(command, baseArgs._unknown || []);
 
-    const context = await createContext({
-      ...args,
-      console
-    });
+    const baseContext =
+      context ||
+      (await createContext({
+        ...args,
+        console
+      }));
 
-    await handler(context, { ...baseArgs, ...args });
+    // TODO -- some hacky business here...
+    if (context && captureOutput) {
+      context.config.console = console;
+    }
+
+    await handler(baseContext, { ...baseArgs, ...args });
 
     return;
   });

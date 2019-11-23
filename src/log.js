@@ -12,13 +12,11 @@ module.exports = {
  * @returns {Logger}
  */
 function loggerFactory(ctx) {
-  const {
-    config: { verbosity, silent, console }
-  } = ctx;
+  const { config } = ctx;
 
   const log = (level, ...args) => {
-    if (silent || verbosity < level) return;
-    console.log(...args);
+    if (config.silent || config.verbosity < level) return;
+    config.console.log(...args);
   };
 
   /**
@@ -35,7 +33,7 @@ function loggerFactory(ctx) {
      * @memberof Logger#
      */
     warn(...args) {
-      if (!silent) console.warn(...args);
+      if (!config.silent) config.console.warn(...args);
     },
 
     /**
@@ -45,7 +43,7 @@ function loggerFactory(ctx) {
      * @memberof Logger#
      */
     error(...args) {
-      if (!silent) console.error(...args);
+      if (!config.silent) config.console.error(...args);
     },
 
     /**
