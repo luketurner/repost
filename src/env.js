@@ -50,18 +50,20 @@ function envsFactory(ctx) {
 
     async getEnvironmentProxy(envName, context) {
       const persist = _.throttle(target => {
-        self.write(envName, JSON.stringify(target, null, 2));
+        self.write(envName, target);
       }, 100);
       return new Proxy(await self.getEnvironment(envName, context), {
         set(target, property, value, receiver) {
           // TODO -- add validation that things like functions aren't being added
+
+          const isSet = Reflect.set(target, property, value, receiver);
 
           // asynchronously persist changes (props starting with __ are ignored for internal usage)
           if (!property.toString().startsWith("__")) {
             persist(target);
           }
 
-          return Reflect.set(target, property, value, receiver);
+          return isSet;
         }
       });
     },
