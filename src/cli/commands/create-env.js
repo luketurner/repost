@@ -20,11 +20,8 @@ module.exports = {
   handler: async (ctx, args) => {
     const { file, prop = [] } = args;
 
-    console.log("props", prop);
-
     const envProps = prop.reduce((envProps, p) => {
       const [key, value] = ctx.util.split(p, "=", 2);
-      console.log("p", p, key, value);
       if (!value)
         throw new Error("Environment properties must be of form: KEY=VALUE");
       return Object.assign(envProps, { [key]: value });
