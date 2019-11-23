@@ -38,16 +38,13 @@ function collectionFactory(ctx) {
      */
     async create(dirname) {
       ctx.log.silly(`collection.create(${dirname})`);
-      const s = await util.statFile(dirname);
 
-      if (s.isFile()) {
+      if (!(await util.accessFile(dirname))) {
+        await util.mkdir(dirname);
+      } else if ((await util.statFile(dirname)).isFile()) {
         throw new Error(
           'Cannot create collection: "' + dirname + '" is not a directory'
         );
-      }
-
-      if (!s.isDirectory()) {
-        await util.mkdir(dirname);
       }
 
       await util.writeFile(path.join(dirname, self.indicatorFile), "");
