@@ -81,6 +81,27 @@ function requestFactory(ctx) {
       if (await ctx.hooks.isHookFile(filename)) return false;
       if (ctx.format.isSupportedExtension(path.extname(filename))) return true;
       return false;
+    },
+
+    /**
+     * Creates a new request, writing it to the specified filename. Returns the content of the file as a string.
+     *
+     * @param {string} filename
+     * @returns {Promise<string>}
+     * @memberof FileRequestRunner#
+     */
+    async create(filename, format, request) {
+      ctx.log.silly(`request.create(${filename})`);
+
+      if (await util.accessFile(filename)) {
+        throw new Error(`Cannot create request: "${filename}" already exists.`);
+      }
+
+      const printedRequest = ctx.format.print(request, format);
+
+      await util.writeFile(filename, printedRequest);
+
+      return printedRequest;
     }
   };
 
