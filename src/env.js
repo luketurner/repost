@@ -49,21 +49,21 @@ function envsFactory(ctx) {
     },
 
     async getEnvironmentProxy(envName, context) {
-      const persist = _.throttle(target => {
-        self.write(envName, target);
+      const persist = _.throttle(async (property, value) => {
+        // TODO -- this is kinda problematic because it might have race conditions?
+        const oldEnv = await self.getRawVariables(envName);
+        self.write(envName, { ...oldEnv, [property]: value });
       }, 100);
       return new Proxy(await self.getEnvironment(envName, context), {
         set(target, property, value, receiver) {
           // TODO -- add validation that things like functions aren't being added
 
-          const isSet = Reflect.set(target, property, value, receiver);
-
           // asynchronously persist changes (props starting with __ are ignored for internal usage)
           if (!property.toString().startsWith("__")) {
-            persist(target);
+            persist(property, value);
           }
 
-          return isSet;
+          return Reflect.set(target, property, value, receiver);
         }
       });
     },
