@@ -3,7 +3,7 @@ const print = require("../print");
 module.exports = {
   example: "create-collection DIRECTORY",
   description:
-    "Initializes a collection in the specified directory. Directory will be created if it doesn't already exist.",
+    "Scaffolds a collection in the directory, which may or may not exist already.",
   options: [
     {
       name: "dir",

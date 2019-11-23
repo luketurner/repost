@@ -121,6 +121,22 @@ function envsFactory(ctx) {
       };
       await self.write(envName, newEnv);
       return newEnv;
+    },
+
+    async create(envName, envObject) {
+      if (envName.endsWith(".env.js")) {
+        throw new Error("scaffold doesn't support .env.js files yet");
+      }
+      if (!envName.endsWith(".env.json")) {
+        envName += ".env.json";
+      }
+
+      if (await util.accessFile(envName)) {
+        throw new Error(
+          `Cannot create environment: ${envName} already exists.`
+        );
+      }
+      return self.write(envName, envObject);
     }
   };
   return self;

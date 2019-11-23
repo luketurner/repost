@@ -66,6 +66,29 @@ const sendHTTPRequest = async request => {
 const sleep = promisify(setTimeout);
 
 /**
+ * Like String#split(), but if there are more than `limit` instances of `delimiter` in the string,
+ * the remaining instances will be present in the last segment, instead of being truncated.
+ *
+ * @param {string} val
+ * @param {string} delimiter
+ * @param {number} limit
+ */
+const split = (val, delimiter, limit) => {
+  const chunks = [];
+  const delimiterLength = delimiter.length;
+  let lastIndex = 0;
+
+  while (--limit) {
+    const ix = val.indexOf(delimiter, lastIndex);
+    chunks.push(val.slice(lastIndex, ix));
+    lastIndex = ix + delimiterLength;
+  }
+
+  chunks.push(val.slice(lastIndex));
+  return chunks;
+};
+
+/**
  * @module repost/util
  */
 module.exports = {
@@ -84,5 +107,6 @@ module.exports = {
   replaceExtension,
   sendHTTPRequest,
   getExecutionContext,
-  sleep
+  sleep,
+  split
 };
