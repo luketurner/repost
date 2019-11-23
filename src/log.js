@@ -13,7 +13,7 @@ module.exports = {
  */
 function loggerFactory(ctx) {
   const {
-    config: { verbosity, silent }
+    config: { verbosity, silent, console }
   } = ctx;
 
   const log = (level, ...args) => {

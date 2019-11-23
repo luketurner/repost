@@ -41,6 +41,7 @@ async function createContext(config) {
     verbosity: 0, // 0, 1, 2, 3
     silent: false,
     env: null,
+    console,
     ...config
   };
 
@@ -117,12 +118,12 @@ async function createContext(config) {
 /**
  * Executes the Repost CLI using the current process's i/o and argv
  *
- * @returns {Promise<void>}
+ * @returns {Promise<CLIOutput>}
  *
  */
-async function cli() {
+async function cli(argv, opts) {
   try {
-    await require("../src/cli")();
+    return await require("../src/cli")(argv || process.argv, opts);
   } catch (e) {
     console.error(e);
   }

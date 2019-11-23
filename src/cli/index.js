@@ -4,6 +4,12 @@ const { createContext } = require("..");
 const BASE_OPTIONS = require("./options");
 const COMMANDS = require("./commands");
 const getHelp = require("./help");
+const util = require("../util");
+const { Writable } = require("stream");
+
+const { promisify } = require("util");
+
+const { Console } = require("console");
 
 const parseBaseArgs = argv => {
   const args = parseArgs(BASE_OPTIONS, {
@@ -31,20 +37,65 @@ const parseCommandArgs = (command, argv) => {
   });
 };
 
-module.exports = async rawArgv => {
-  const baseArgs = parseBaseArgs(rawArgv);
-  const { command, help } = baseArgs;
-
-  if (help) return console.log(getHelp(command));
-  if (!command) {
-    console.log(getHelp(command));
-    throw new Error("Usage: repost [command]");
+const withConsole = async (capture = false, fn) => {
+  if (!capture) {
+    return {
+      result: await fn(console)
+    };
   }
 
-  const handler = getCommandHandler(command);
-  const args = parseCommandArgs(command, baseArgs._unknown || []);
+  const stdoutChunks = [];
+  const stderrChunks = [];
+  const stdout = new Writable({
+    write(chunk, encoding, callback) {
+      stdoutChunks.push(chunk);
+      callback();
+    }
+  });
+  const stderr = new Writable({
+    write(chunk, encoding, callback) {
+      stderrChunks.push(chunk);
+      callback();
+    }
+  });
 
-  const context = await createContext(args);
+  const logConsole = new Console(stdout, stderr);
 
-  return await handler(context, { ...baseArgs, ...args });
+  const result = await fn(logConsole);
+
+  await promisify(stdout.end.bind(stdout))();
+  await promisify(stderr.end.bind(stderr))();
+
+  return {
+    result,
+    stdout: Buffer.concat(stdoutChunks).toString("utf8"),
+    stderr: Buffer.concat(stderrChunks).toString("utf8")
+  };
+};
+
+module.exports = async (rawArgv, config) => {
+  const { captureOutput = false } = config || {};
+
+  return await withConsole(captureOutput, async console => {
+    const baseArgs = parseBaseArgs(rawArgv);
+    const { command, help } = baseArgs;
+
+    if (help) return console.log(getHelp(command));
+    if (!command) {
+      console.log(getHelp(command));
+      throw new Error("Usage: repost [command]");
+    }
+
+    const handler = getCommandHandler(command);
+    const args = parseCommandArgs(command, baseArgs._unknown || []);
+
+    const context = await createContext({
+      ...args,
+      console
+    });
+
+    await handler(context, { ...baseArgs, ...args });
+
+    return;
+  });
 };
