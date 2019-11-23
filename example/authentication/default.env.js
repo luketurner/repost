@@ -14,6 +14,7 @@ module.exports = {
     const accessToken = response.data.access_token;
 
     log.info("get_access_token:", accessToken);
+    env.access_token = accessToken;
     return accessToken;
   }
 };
