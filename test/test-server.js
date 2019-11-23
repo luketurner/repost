@@ -2,8 +2,9 @@ const express = require("express");
 const app = express();
 
 app.get("/auth", (req, res) => {
+  console.log(req.method, req.url);
   res.send({
-    access_token: "12345",
+    access_token: "test_token",
     expires: new Date(Date.now() + 1000000).toISOString()
   });
 });
