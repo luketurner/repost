@@ -6,7 +6,6 @@ module.exports = {
     if (error) throw error;
 
     if (!response || !response.data || !response.data.access_token) {
-      log.info("response", response);
       throw new Error(
         "Authorization response has no access_token property. Got: " + response
       );
