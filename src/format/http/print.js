@@ -2,9 +2,10 @@ module.exports = (ctx, request) => {
   const { url, method, data, headers } = request;
   const headerString =
     Object.keys(headers).length > 0
-      ? Object.keys(headers)
+      ? "\n" +
+        Object.keys(headers)
           .map(k => `${k}: ${headers[k]}`)
-          .join("\n") + "\n"
+          .join("\n")
       : "";
-  return `${method} ${url} HTTP/1.1${headerString} \n\n${data}`;
+  return `${method} ${url} HTTP/1.1${headerString}\n\n${data}`;
 };
