@@ -72,6 +72,7 @@ const sleep = promisify(setTimeout);
  * @param {string} val
  * @param {string} delimiter
  * @param {number} limit
+ * @memberof module:repost/util
  */
 const split = (val, delimiter, limit) => {
   const chunks = [];

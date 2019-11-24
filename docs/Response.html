@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Interface: RepostConfig</title>
+    <title>JSDoc: Interface: Response</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Interface: RepostConfig</h1>
+    <h1 class="page-title">Interface: Response</h1>
 
     
 
@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2>RepostConfig</h2>
+        <h2>Response</h2>
         
     
 </header>
@@ -36,6 +36,9 @@
 <article>
     <div class="container-overview">
     
+        
+            <div class="description"><p>This interface defines the core properties expected to be on a Repost response object.</p>
+<p>Depending on the request's handler implementation, additional properties might be present, and will be ignored.</p></div>
         
 
         
@@ -67,7 +70,30 @@
 
         <tr>
             
-                <td class="name"><code>env</code></td>
+                <td class="name"><code>status</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>statusText</code></td>
             
 
             <td class="type">
@@ -90,13 +116,62 @@
 
         <tr>
             
-                <td class="name"><code>silent</code></td>
+                <td class="name"><code>headers</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Request.html">Request</a></span>
 
 
             
@@ -145,7 +220,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line22">line 22</a>
+        <a href="request.js.html">request.js</a>, <a href="request.js.html#line27">line 27</a>
     </li></ul></dd>
     
 

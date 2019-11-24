@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Tutorial: Request Format: Javascript</title>
+    <title>JSDoc: Tutorial: Architecture</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,53 +17,30 @@
 
 <div id="main">
 
-    <h1 class="page-title">Tutorial: Request Format: Javascript</h1>
+    <h1 class="page-title">Tutorial: Architecture</h1>
 
     <section>
 
 <header>
     
 
-    <h2>Request Format: Javascript</h2>
+    <h2>Architecture</h2>
 </header>
 
 <article>
-    <p>Request files ending with <code>.js</code> are assumed to contain a CommonJS module that exports a <a href="Request.html">Request</a> object, or a function returning a <a href="Request.html">Request</a> object.</p>
-<p>A very simple JS request looks like:</p>
-<pre class="prettyprint source lang-js"><code>// my_request.js
-module.exports = {
-  url: &quot;http://foo.com&quot;,
-  method: &quot;GET&quot;
-};
-</code></pre>
-<p>Or using the function-style, a trivial example:</p>
-<pre class="prettyprint source lang-js"><code>// my_fn_request.js
-module.exports = () => {
-  const url = &quot;http://foo.com&quot;;
-  const method = &quot;GET&quot;;
-  return { url, method };
-};
-</code></pre>
-<p>Note that the exported function can be <code>async</code> if you want, in which case it will be automatically awaited.</p>
-<pre class="prettyprint source lang-js"><code>// my_async_request.js
-module.exports = async () => {
-  const url = &quot;http://foo.com&quot;;
-  const method = &quot;GET&quot;;
-  return { url, method };
-};
-</code></pre>
-<p>Furthermore, it's possible to completely customize the behavior of the request by placing an optional <code>handler</code> property on the exported <a href="Request.html">Request</a>. The handler can be async.</p>
-<pre class="prettyprint source lang-js"><code>// my_weird_request.js
-module.exports = {
-  async handler(request) {
-    return {
-      data: &quot;Foo!&quot;
-    };
-  }
-};
-</code></pre>
-<p>When <code>handler</code> is set, it will be called with request during execution, and the return value (or the resolved value of a returned Promise) will be used as the response.</p>
-<p>The default <code>handler</code> for all request types is util.sendHTTPRequest. The custom JS request type is the only one that allows you to override this default.</p>
+    <p>This page describes Repost's internal architecture. This information is intended for programmers who want to learn about the Repost codebase.</p>
+<h1>Overview</h1>
+<p>The Repost codebase aims to achieve the following invariants:</p>
+<ul>
+<li>No global state usage. A script should be able to use multiple RepostContexts independently.</li>
+<li>The same API can be used in user scripts as well as library consumers.</li>
+<li>All user scripts support async code.</li>
+<li>All output (e.g. logging) can be captured and configured.</li>
+<li>No usage of JS prototypes or the <code>this</code> or <code>new</code> keywords (except to instantiate classes from dependencies.)</li>
+<li>Coherently documentable with JSDoc</li>
+<li>Promises (and <code>async</code>/<code>await</code>) are preferred form of asynchronous control flow.</li>
+</ul>
+<p>WIP!</p>
 </article>
 
 </section>
