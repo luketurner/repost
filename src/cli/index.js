@@ -96,7 +96,6 @@ module.exports = async (rawArgv, config) => {
         console
       }));
 
-    // TODO -- some hacky business here...
     if (context && captureOutput) {
       context.config.console = console;
     }

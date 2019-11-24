@@ -76,12 +76,14 @@ function collectionFactory(ctx) {
     async getRequests(dirname) {
       // TODO -- this should be recursing into subdirectories
       const filesInCollection = await util.readDir(dirname);
-      return (
-        filesInCollection
-          .filter(f => f === self.indicatorFile)
-          // .filter(f => !session.hook.isHookFile(f)) TODO
-          .map(f => path.join(dirname, f))
-      );
+      const requestFiles = [];
+      for (const f of filesInCollection) {
+        if (f === self.indicatorFile) continue;
+        if (await ctx.request.isRequest(path.join(dirname, f))) {
+          requestFiles.push(f);
+        }
+      }
+      return requestFiles;
     }
   };
 
