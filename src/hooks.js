@@ -45,7 +45,7 @@ function hookFactory(ctx) {
 
         const code = await util.readFile(filename);
 
-        // TODO -- this results in hooks being executed in a different context from handler in raw `.js` tests.
+        // TODO -- for custom JS tests, this results in the module being evaluated twice.
         const exported = code ? (await ctx.evalModule(code)) || {} : {};
 
         before = exported.before;

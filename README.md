@@ -56,6 +56,42 @@ npm run docs:serve  # Builds the docs and serves on localhost:8080
 npm run docs:watch  # like docs:serve, but automatically rebuilds on file changes
 ```
 
+# TODOs
+
+The following things should be complete before `repost` is considered "release ready:"
+
+- Improved collection support
+  - getRequests should include all requests in subdirectories
+  - `repost run` should accept non-collection directories that may contain collections
+- Environment resolution should look in parent directories, look relative to request paths, and find any environment, but prefer default ones
+- Environment writing should resolve possible race conditions
+- Hooks for custom JS requests should execute only once
+- Add collection and hook examples
+- CLI interface improvements
+  - Use of subcommands with verb-noun format (`create request`, `create env`, etc.)
+  - Better documentation of default arguments
+  - Robust response printing for custom response handlers
+  - More configuration options exposed via CLI
+- JSDoc improvements
+  - Complete Getting Started for CLI
+  - Complete Getting Started for Library
+  - Document collections
+  - Document architecture
+  - Integrate example directory into documentation
+  - Add more links
+  - Find way to document non-class object more effectively?
+  - Fully documented Request and Response formats
+
+The following larger features are also "on the roadmap":
+
+- API support for more than one request per file
+  - Use of `?` syntax to query sub-requests on command line
+- Support for OpenAPI (swagger) formatted requests
+- Support for multiple formats having the same extension, able to disambiguate based on content
+- Support for Postman collections
+- Able to run as a "mock server" for some request types instead of acting as a "mock client"
+- Built-in APIs for common but complicated workflows, like OAuth token herding.
+
 ---
 
 Copyright 2019 Luke Turner - Published under the MIT License.
