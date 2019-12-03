@@ -1,5 +1,4 @@
 module.exports = [
-  { name: "command", defaultOption: true },
   {
     name: "verbose",
     alias: "v",

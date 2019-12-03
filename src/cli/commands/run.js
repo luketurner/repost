@@ -1,7 +1,8 @@
 const print = require("../print");
 
 module.exports = {
-  example: "run foo.http",
+  name: "run",
+  examples: ["run foo.http"],
   description: "Execute one or more requests or collections.",
   options: [
     {
@@ -18,11 +19,16 @@ module.exports = {
       defaultValue: "default.env.json"
     }
   ],
-  handler: async (ctx, args) => {
-    const { file } = args;
+  handler: async ctx => {
+    const { file } = ctx.args;
+    if (!file || !file.length) {
+      throw new Error("No files specified.");
+    }
 
-    const responses = await ctx.run(file);
-    if (responses) ctx.log.info(print.httpResponseList(responses));
-    else ctx.log.info("No files specified.");
+    const repostContext = ctx.data.repostContext;
+
+    const responses = await repostContext.run(file);
+    if (responses) ctx.console.log(print.httpResponseList(responses));
+    else throw new Error("No files specified.");
   }
 };

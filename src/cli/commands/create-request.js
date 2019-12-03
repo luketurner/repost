@@ -1,7 +1,8 @@
 const print = require("../print");
 
 module.exports = {
-  example: "create-request FILE",
+  name: "create-request",
+  example: ["create-request FILE"],
   description: "Scaffolds a new request file of the specified format.",
   options: [
     {
@@ -18,14 +19,15 @@ module.exports = {
       type: String
     }
   ],
-  handler: async (ctx, args) => {
-    let { file, format } = args;
+  handler: async ctx => {
+    let { file, format } = ctx.args;
+    const repostContext = ctx.data.repostContext;
 
-    if (!file) return ctx.log.error("No filename specified.");
+    if (!file) return repostContext.log.error("No filename specified.");
 
-    if (!format) format = ctx.format.guessFormat(file);
+    if (!format) format = repostContext.format.guessFormat(file);
     if (!format)
-      return ctx.log.error(
+      return repostContext.log.error(
         "Cannot determine format for request: unsupported extension."
       );
 
@@ -39,9 +41,11 @@ module.exports = {
     };
 
     if (file === "-") {
-      return ctx.log.info(ctx.format.print(request, format));
+      return repostContext.log.info(
+        repostContext.format.print(request, format)
+      );
     }
 
-    await ctx.request.create(file, format, request);
+    await repostContext.request.create(file, format, request);
   }
 };

@@ -1,7 +1,8 @@
 const print = require("../print");
 
 module.exports = {
-  example: "create-collection DIRECTORY",
+  name: "create-collection",
+  example: ["create-collection DIRECTORY"],
   description:
     "Scaffolds a collection in the directory, which may or may not exist already.",
   options: [
@@ -11,10 +12,11 @@ module.exports = {
       type: String
     }
   ],
-  handler: async (ctx, args) => {
-    const { dir } = args;
+  handler: async ctx => {
+    const { dir } = ctx.args;
+    const repostContext = ctx.data.repostContext;
 
-    if (!dir) return ctx.log.error("No directory name specified.");
-    await ctx.collection.create(dir);
+    if (!dir) return repostContext.log.error("No directory name specified.");
+    await repostContext.collection.create(dir);
   }
 };

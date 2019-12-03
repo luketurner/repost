@@ -14,10 +14,18 @@ const { envsFactory } = require("./env");
 /**
  * @module repost
  */
-module.exports = {
-  createContext,
-  cli
-};
+module.exports = {};
+
+/**
+ * Creates a new RepostContext
+ *
+ */
+module.exports.createContext = createContext;
+
+/**
+ * Runs the CLI
+ */
+module.exports.cli = require("./cli").cli;
 
 /**
  * @interface RepostConfig
@@ -113,18 +121,4 @@ async function createContext(config) {
     : {};
 
   return ctx;
-}
-
-/**
- * Executes the Repost CLI using the current process's i/o and argv
- *
- * @returns {Promise<CLIOutput>}
- *
- */
-async function cli(argv, opts) {
-  try {
-    return await require("../src/cli")(argv || process.argv, opts);
-  } catch (e) {
-    console.error(e);
-  }
 }

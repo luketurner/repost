@@ -1,107 +1,59 @@
-const parseArgs = require("command-line-args");
+const { exec, AppError } = require("cli-of-mine");
 
-const { createContext } = require("..");
-const BASE_OPTIONS = require("./options");
-const COMMANDS = require("./commands");
-const getHelp = require("./help");
-const util = require("../util");
-const { Writable } = require("stream");
+const packageJson = require("../../package.json");
 
-const { promisify } = require("util");
+const repost = require("..");
 
-const { Console } = require("console");
+module.exports = { cli };
 
-const parseBaseArgs = argv => {
-  const args = parseArgs(BASE_OPTIONS, {
-    stopAtFirstUnknown: true,
-    camelCase: true,
-    argv
-  });
-  args.verbose = args.verbose ? args.verbose.length : 0;
-
-  return args;
-};
-
-const getCommandHandler = command => {
-  if (!COMMANDS[command]) throw new Error("Unknown command: " + command);
-  const { handler } = COMMANDS[command];
-  return handler;
-};
-
-const parseCommandArgs = (command, argv) => {
-  if (!COMMANDS[command]) throw new Error("Unknown command: " + command);
-  const { options } = COMMANDS[command];
-  return parseArgs(options, {
-    argv,
-    camelCase: true
-  });
-};
-
-const withConsole = async (capture = false, fn) => {
-  if (!capture) {
-    return {
-      result: await fn(console)
-    };
-  }
-
-  const stdoutChunks = [];
-  const stderrChunks = [];
-  const stdout = new Writable({
-    write(chunk, encoding, callback) {
-      stdoutChunks.push(chunk);
-      callback();
-    }
-  });
-  const stderr = new Writable({
-    write(chunk, encoding, callback) {
-      stderrChunks.push(chunk);
-      callback();
-    }
-  });
-
-  const logConsole = new Console(stdout, stderr);
-
-  const result = await fn(logConsole);
-
-  await promisify(stdout.end.bind(stdout))();
-  await promisify(stderr.end.bind(stderr))();
-
-  return {
-    result,
-    stdout: Buffer.concat(stdoutChunks).toString("utf8"),
-    stderr: Buffer.concat(stderrChunks).toString("utf8")
+async function cli(config) {
+  config = {
+    ...config
   };
-};
+  return exec({
+    name: packageJson.name,
+    description: packageJson.description,
+    version: packageJson.version,
 
-module.exports = async (rawArgv, config) => {
-  const { captureOutput = false, context = undefined } = config || {};
+    stdin: config.stdin,
+    stdout: config.stdout,
+    stderr: config.stderr,
+    argv: config.argv,
+    catchErrors: config.catchErrors,
 
-  return await withConsole(captureOutput, async console => {
-    const baseArgs = parseBaseArgs(rawArgv);
-    const { command, help } = baseArgs;
+    examples: ["repost run foo.http"],
 
-    if (help) return console.log(getHelp(command));
-    if (!command) {
-      console.log(getHelp(command));
-      throw new Error("Usage: repost [command]");
+    handler: getBaseHandler(config),
+
+    options: require("./options"),
+
+    subcommands: [
+      require("./commands/run"),
+      require("./commands/create-collection"),
+      require("./commands/create-request"),
+      require("./commands/create-env")
+    ]
+  });
+}
+
+function getBaseHandler(config) {
+  return async (ctx, next) => {
+    if (!ctx.subcommand) {
+      throw new AppError("MISSING_SUBCOMMAND", "Usage: repost COMMAND");
     }
-
-    const handler = getCommandHandler(command);
-    const args = parseCommandArgs(command, baseArgs._unknown || []);
 
     const baseContext =
-      context ||
-      (await createContext({
-        ...args,
-        console
+      config.context ||
+      (await repost.createContext({
+        ...ctx.args,
+        console: ctx.console
       }));
 
-    if (context && captureOutput) {
-      context.config.console = console;
+    if (config.context) {
+      config.context.config.console = ctx.console;
     }
 
-    await handler(baseContext, { ...baseArgs, ...args });
-
-    return;
-  });
-};
+    ctx.data.repostContext = baseContext;
+    return next();
+  };
+}

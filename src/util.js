@@ -63,7 +63,11 @@ const sendHTTPRequest = async request => {
   return await axios(request);
 };
 
-const sleep = promisify(setTimeout);
+const sleep = async ms => {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms);
+  });
+};
 
 /**
  * Like String#split(), but if there are more than `limit` instances of `delimiter` in the string,

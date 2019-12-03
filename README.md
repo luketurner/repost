@@ -68,10 +68,12 @@ The following things should be complete before `repost` is considered "release r
 - Hooks for custom JS requests should execute only once
 - Add collection and hook examples
 - CLI interface improvements
+  - Codify exit codes
   - Use of subcommands with verb-noun format (`create request`, `create env`, etc.)
   - Better documentation of default arguments
   - Robust response printing for custom response handlers
   - More configuration options exposed via CLI
+  - Accept requests from stdin
 - JSDoc improvements
   - Complete Getting Started for CLI
   - Complete Getting Started for Library

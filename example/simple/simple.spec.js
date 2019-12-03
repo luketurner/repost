@@ -8,8 +8,10 @@ describe("example/simple", () => {
   });
 
   it("should return success message", async () => {
-    const res = await cli(["run", "request.http"], {
-      captureOutput: true
+    const res = await cli({
+      argv: ["run", "request.http"],
+      stdout: "capture",
+      catchErrors: false
     });
     expect(res.stdout).toMatch("Success!");
   });

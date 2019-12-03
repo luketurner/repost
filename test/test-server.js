@@ -28,3 +28,7 @@ module.exports = {
     }
   }
 };
+
+if (require.main === module) {
+  module.exports.listen().then(() => console.log("Listening on port 8000"));
+}
