@@ -11,7 +11,7 @@ describe("example/simple", () => {
     const res = await cli({
       argv: ["run", "request.http"],
       stdout: "capture",
-      catchErrors: false
+      errorStrategy: "throw"
     });
     expect(res.stdout).toMatch("Success!");
   });

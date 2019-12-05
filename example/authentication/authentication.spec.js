@@ -18,7 +18,7 @@ describe("example/authentication", () => {
       stdin: "capture",
       stdout: "capture",
       context: testContext,
-      catchErrors: false
+      errorStrategy: "throw"
     });
     expect(res.stdout).toMatch("get_access_token: test_token");
     expect(res.stdout).toMatch("Success!");

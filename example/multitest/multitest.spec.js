@@ -11,7 +11,7 @@ describe("example/multitest", () => {
     const res = await cli({
       argv: ["run", "foobarbaz.js"],
       stdout: "capture",
-      catchErrors: false
+      errorStrategy: "throw"
     });
     expect(res.stdout).toMatch("Done!");
   });

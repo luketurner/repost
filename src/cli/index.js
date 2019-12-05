@@ -19,7 +19,7 @@ async function cli(config) {
     stdout: config.stdout,
     stderr: config.stderr,
     argv: config.argv,
-    catchErrors: config.catchErrors,
+    errorStrategy: config.errorStrategy,
 
     examples: ["repost run foo.http"],
 
