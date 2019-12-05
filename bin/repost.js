@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
-const repost = require('../');
+const repost = require("../");
 
-repost.cli();
+repost.cli({
+  errorStrategy: "exit"
+});
