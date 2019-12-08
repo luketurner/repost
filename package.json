@@ -11,7 +11,7 @@
     "test:watch": "npm run test -- --watch",
     "docs": "rm -rf ./docs && jsdoc -c jsdoc.json",
     "docs:serve": "npm run docs && http-server ./docs -a localhost",
-    "docs:watch": "nodemon --watch src --watch -e js,md tutorials --exec \"npm run docs:serve\""
+    "docs:watch": "nodemon --watch src --watch tutorials --watch README.md -e js,md --exec \"npm run docs:serve\""
   },
   "files": [
     "src",
