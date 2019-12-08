@@ -27,11 +27,12 @@ async function cli(config) {
 
     options: require("./options"),
 
-    subcommands: [
-      require("./commands/run"),
-      require("./commands/create-collection"),
-      require("./commands/create-request"),
-      require("./commands/create-env")
+    subcommands: [require("./commands/run")],
+
+    resources: [
+      require("./resources/collection"),
+      require("./resources/request"),
+      require("./resources/environment")
     ]
   });
 }
