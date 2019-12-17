@@ -1,4 +1,4 @@
-module.exports = {
+export const environment = {
   name: "Environment",
   aliases: ["env"],
 

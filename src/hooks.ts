@@ -1,12 +1,5 @@
-const path = require("path");
-const util = require("./util");
-
-/**
- * @module repost/hooks
- */
-module.exports = {
-  hookFactory
-};
+import { replaceExtension, readFile, readDir } from "./util";
+import { extname, dirname, basename } from "path";
 
 /**
  * @interface Hooks
@@ -21,7 +14,7 @@ module.exports = {
  * @param {RepostContext} ctx
  * @returns {JSHookLoader}
  */
-function hookFactory(ctx) {
+export function hookFactory(ctx) {
   /**
    * The JSHookLoader contains logic for loading hooks from JS "hook files."
    *
@@ -40,10 +33,10 @@ function hookFactory(ctx) {
       let before, after;
       try {
         if (!filename.endsWith(".js")) {
-          filename = util.replaceExtension(filename, ".js");
+          filename = replaceExtension(filename, ".js");
         }
 
-        const code = await util.readFile(filename);
+        const code = await readFile(filename);
 
         // TODO -- for custom JS tests, this results in the module being evaluated twice.
         const exported = code ? (await ctx.evalModule(code)) || {} : {};
@@ -66,21 +59,18 @@ function hookFactory(ctx) {
      * @memberof JSHookLoader#
      */
     async isHookFile(filename) {
-      const ext = path.extname(filename);
+      const ext = extname(filename);
       if (ext !== ".js") return false;
 
       if (ctx.envs.isEnvFile(filename)) return false;
 
-      const basename = path.basename(filename, ext);
-      const basename_with_ext = path.basename(filename);
+      const base = basename(filename, ext);
+      const baseWithExt = basename(filename);
 
-      for (const sib of await util.readDir(path.dirname(filename))) {
-        const sib_basename = path.basename(sib, path.extname(sib));
-        const sib_basename_with_ext = path.basename(sib);
-        if (
-          sib_basename === basename &&
-          sib_basename_with_ext !== basename_with_ext
-        ) {
+      for (const sib of await readDir(dirname(filename))) {
+        const sibBase = basename(sib, extname(sib));
+        const sibBaseWithExt = basename(sib);
+        if (sibBase === base && sibBaseWithExt !== baseWithExt) {
           return true;
         }
       }

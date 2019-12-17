@@ -1,6 +1,6 @@
-const print = require("../print");
+import { printHttpResponseList } from "../print";
 
-module.exports = {
+export const run = {
   name: "run",
   examples: ["run foo.http"],
   description: "Execute one or more requests or collections.",
@@ -28,7 +28,7 @@ module.exports = {
     const repostContext = ctx.data.repostContext;
 
     const responses = await repostContext.run(file);
-    if (responses) ctx.console.log(print.httpResponseList(responses));
+    if (responses) ctx.console.log(printHttpResponseList(responses));
     else throw new Error("No files specified.");
   }
 };

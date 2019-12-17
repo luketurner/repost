@@ -1,4 +1,4 @@
-const util = require("../../util");
+import { regexGroups } from "../../util";
 
 class RequestParseError extends Error {
   constructor(fieldName, value, context) {
@@ -8,7 +8,7 @@ class RequestParseError extends Error {
 }
 
 const parseRequestLine = line => {
-  const [method, url, httpVersion] = util.regexGroups(
+  const [method, url, httpVersion] = regexGroups(
     /^([A-Z]+) (.+?) (HTTP\/[\d.]+)$/g,
     line
   );
@@ -23,7 +23,7 @@ const parseRequestLine = line => {
 };
 
 const parseHeader = line => {
-  const [key, value] = util.regexGroups(/^([\w\d_-]+):(.+)$/g, line);
+  const [key, value] = regexGroups(/^([\w\d_-]+):(.+)$/g, line);
   if (!key || !value.trim()) {
     console.warn("Skipping badly-formatted header:", key, ":", value);
     return {};
@@ -43,7 +43,7 @@ const parseBody = body => {
   return { data: body }; // easy?!
 };
 
-const parse = (ctx, httpRequest) => {
+export const parse = (ctx, httpRequest) => {
   httpRequest = httpRequest.replace(/\r\n/g, "\n"); // Convert newlines to consistent format in case requests come from windows
 
   const headerStartIndex = httpRequest.indexOf("\n") + 1;
@@ -70,5 +70,3 @@ const parse = (ctx, httpRequest) => {
     ...parsedBody
   };
 };
-
-module.exports = parse;

@@ -1,4 +1,4 @@
-const httpResponse = response => {
+export const printHttpResponse = response => {
   if (!response.request) {
     // TODO -- not an http response, probably from a custom JS thing. Just assume they set .data
     return response.data;
@@ -13,15 +13,10 @@ const httpResponse = response => {
   );
 };
 
-const httpResponseList = responseList => {
+export const printHttpResponseList = responseList => {
   return responseList
     .map(({ error, response, request }) => {
-      return `\n--- ${request} ---\n${error || httpResponse(response)}`;
+      return `\n--- ${request} ---\n${error || printHttpResponse(response)}`;
     })
     .join("\n");
-};
-
-module.exports = {
-  httpResponse,
-  httpResponseList
 };

@@ -1,38 +1,19 @@
-const util = require("./util");
+import {
+  createContext as vmCreateContext,
+  runInContext as vmRunInContext
+} from "vm";
+export { cli } from "./cli";
 
-const vm = require("vm");
-const _ = require("lodash");
+import * as util from "./util";
+import * as _ from "lodash";
 
-const { collectionFactory } = require("./collection");
-const { loggerFactory } = require("./log");
-const { runnerFactory } = require("./run");
-const { formatFactory } = require("./format");
-const { hookFactory } = require("./hooks");
-const { requestFactory } = require("./request");
-const { envsFactory } = require("./env");
-
-/**
- * @module repost
- */
-module.exports = {};
-
-/**
- * Creates a new RepostContext
- *
- */
-module.exports.createContext = createContext;
-
-/**
- * Runs the CLI
- */
-module.exports.cli = require("./cli").cli;
-
-/**
- * @interface RepostConfig
- * @global
- * @property {string} env
- * @property {boolean} silent
- */
+import { loggerFactory } from "./log";
+import { formatFactory } from "./format";
+import { hookFactory } from "./hooks";
+import { collectionFactory } from "./collection";
+import { requestFactory } from "./request";
+import { runnerFactory } from "./run";
+import { envsFactory } from "./env";
 
 /**
  * Creates and returns a new RepostContext object.
@@ -41,7 +22,7 @@ module.exports.cli = require("./cli").cli;
  * @returns {Promise<RepostContext>}
  */
 // TODO -- can we stop having to make this async?
-async function createContext(config) {
+export async function createContext(config) {
   config = config || {};
 
   // Set default values
@@ -58,7 +39,7 @@ async function createContext(config) {
    * @interface RepostContext
    * @global
    */
-  const ctx = vm.createContext({
+  const ctx = vmCreateContext({
     /**
      * Lodash instance for user scripting
      * @property _
@@ -99,7 +80,7 @@ async function createContext(config) {
       // We could create a new context each time, but I sort of like the idea of having them shared, for some reason.
       const ctxModule = { exports: {} };
       ctx.module = ctxModule;
-      vm.runInContext(code, ctx);
+      vmRunInContext(code, ctx);
       delete ctx.module;
       let result = ctxModule && ctxModule.exports;
       if (typeof result === "function") {

@@ -1,20 +1,10 @@
-const util = require("./util");
-const path = require("path");
-
-/**
- * @module repost/run
- */
-module.exports = {
-  runnerFactory
-};
-
 /**
  * Runner factory.
  *
  * @param {*} ctx
  * @returns {*}
  */
-function runnerFactory(ctx) {
+export function runnerFactory(ctx) {
   /**
    * (Note -- this interface is a single function.)
    *

@@ -1,17 +1,8 @@
-const path = require("path");
-const util = require("./util");
-
-const fs = require("fs");
-const _ = require("lodash");
+import { dirname, join as joinPath } from "path";
+import { accessFile, readFile, writeFile } from "./util";
+import { throttle } from "lodash";
 
 const DEFAULT_ENVIRONMENT = "default.env.json";
-
-/**
- * @module repost/env
- */
-module.exports = {
-  envsFactory
-};
 
 /**
  * Factory function for EnvLoader.
@@ -19,7 +10,7 @@ module.exports = {
  * @param {RepostContext} ctx
  * @returns {EnvLoader}
  */
-function envsFactory(ctx) {
+export function envsFactory(ctx) {
   /**
    * @interface EnvLoader
    */
@@ -39,9 +30,9 @@ function envsFactory(ctx) {
 
     async resolveEnvironment(requestFile) {
       // TODO -- this logic is incomplete, should walk parent directories too.
-      const dirname = path.dirname(requestFile);
-      const envFilename = path.join(dirname, DEFAULT_ENVIRONMENT);
-      if (await util.accessFile(envFilename)) {
+      const dir = dirname(requestFile);
+      const envFilename = joinPath(dir, DEFAULT_ENVIRONMENT);
+      if (await accessFile(envFilename)) {
         return envFilename;
       }
 
@@ -49,7 +40,7 @@ function envsFactory(ctx) {
     },
 
     async getEnvironmentProxy(envName, context) {
-      const persist = _.throttle(async (property, value) => {
+      const persist = throttle(async (property, value) => {
         // TODO -- this is kinda problematic because it might have race conditions?
         const oldEnv = await self.getRawVariables(envName);
         self.write(envName, { ...oldEnv, [property]: value });
@@ -85,7 +76,7 @@ function envsFactory(ctx) {
       }
 
       try {
-        const code = await util.readFile(envName, "utf8");
+        const code = await readFile(envName, "utf8");
         if (!code) return {};
         return await context.evalModule(code);
       } catch (err) {
@@ -100,7 +91,7 @@ function envsFactory(ctx) {
       }
 
       try {
-        const json = await util.readFile(envName, "utf8");
+        const json = await readFile(envName, "utf8");
         const env = JSON.parse(json);
         if (env === null || typeof env !== "object") return {};
         return env;
@@ -111,7 +102,7 @@ function envsFactory(ctx) {
     },
 
     async write(envName, envObject) {
-      return util.writeFile(envName, JSON.stringify(envObject, null, 2));
+      return writeFile(envName, JSON.stringify(envObject, null, 2));
     },
 
     async patch(envName, patchObject) {
@@ -131,7 +122,7 @@ function envsFactory(ctx) {
         envName += ".env.json";
       }
 
-      if (await util.accessFile(envName)) {
+      if (await accessFile(envName)) {
         throw new Error(
           `Cannot create environment: ${envName} already exists.`
         );

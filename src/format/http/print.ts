@@ -1,4 +1,4 @@
-module.exports = (ctx, request) => {
+export const print = (ctx, request) => {
   const { url, method, data, headers } = request;
   const headerString =
     Object.keys(headers).length > 0

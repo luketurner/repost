@@ -1,4 +1,4 @@
-module.exports = {
+export const collection = {
   name: "Collection",
   aliases: ["coll"],
 

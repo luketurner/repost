@@ -1,5 +1,5 @@
-module.exports = {
-  name: "request",
+export const request = {
+  name: "Request",
   aliases: ["req"],
 
   commands: [

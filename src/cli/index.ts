@@ -1,12 +1,18 @@
-const { exec, AppError } = require("cli-of-mine");
+import { exec, AppError } from "cli-of-mine";
 
+import { createContext } from "..";
+
+import { options } from "./options";
+import { run } from "./commands/run";
+import { collection } from "./resources/collection";
+import { environment } from "./resources/environment";
+import { request } from "./resources/request";
+
+// a little odd. Don't actually compile/copy this file to the output directory, just reference it
+// (the path is the same from source vs. built code)
 const packageJson = require("../../package.json");
 
-const repost = require("..");
-
-module.exports = { cli };
-
-async function cli(config) {
+export async function cli(config) {
   config = {
     ...config
   };
@@ -25,15 +31,11 @@ async function cli(config) {
 
     handler: getBaseHandler(config),
 
-    options: require("./options"),
+    options: options,
 
-    subcommands: [require("./commands/run")],
+    subcommands: [run],
 
-    resources: [
-      require("./resources/collection"),
-      require("./resources/request"),
-      require("./resources/environment")
-    ]
+    resources: [collection, environment, request]
   });
 }
 
@@ -45,7 +47,7 @@ function getBaseHandler(config) {
 
     const baseContext =
       config.context ||
-      (await repost.createContext({
+      (await createContext({
         ...ctx.args,
         console: ctx.console
       }));

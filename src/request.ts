@@ -1,12 +1,5 @@
-const util = require("./util");
-const path = require("path");
-/**
- * @module repost/request
- */
-module.exports = {
-  requestFactory
-};
-
+import { extname } from "path";
+import { accessFile, writeFile } from "./util";
 /**
  * This interface defines the core properties expected to be on a Repost request object.
  *
@@ -53,7 +46,7 @@ module.exports = {
  * @param {RepostContext} ctx
  * @returns {FileRequestRunner}
  */
-function requestFactory(ctx) {
+export function requestFactory(ctx) {
   /**
    * The FileRequestRunner provides methods relating to reading and executing requests stored on the filesystem.
    *
@@ -111,7 +104,7 @@ function requestFactory(ctx) {
     async isRequest(filename) {
       if (ctx.envs.isEnvFile(filename)) return false;
       if (await ctx.hooks.isHookFile(filename)) return false;
-      if (ctx.format.isSupportedExtension(path.extname(filename))) return true;
+      if (ctx.format.isSupportedExtension(extname(filename))) return true;
       return false;
     },
 
@@ -125,13 +118,13 @@ function requestFactory(ctx) {
     async create(filename, format, request) {
       ctx.log.silly(`request.create(${filename})`);
 
-      if (await util.accessFile(filename)) {
+      if (await accessFile(filename)) {
         throw new Error(`Cannot create request: "${filename}" already exists.`);
       }
 
       const printedRequest = ctx.format.print(request, format);
 
-      await util.writeFile(filename, printedRequest);
+      await writeFile(filename, printedRequest);
 
       return printedRequest;
     }

@@ -1,11 +1,5 @@
-const path = require("path");
-const util = require("./util");
-
-/**
- * @module collection
- * @private
- */
-module.exports = { collectionFactory };
+import { join as joinPath } from "path";
+import { mkdir, accessFile, statFile, writeFile, readDir } from "./util";
 
 /**
  * CollectionHelper factory.
@@ -13,7 +7,7 @@ module.exports = { collectionFactory };
  * @param {RepostContext} ctx
  * @returns {CollectionHelper}
  */
-function collectionFactory(ctx) {
+export function collectionFactory(ctx) {
   /**
    * Collection helper module
    *
@@ -39,15 +33,15 @@ function collectionFactory(ctx) {
     async create(dirname) {
       ctx.log.silly(`collection.create(${dirname})`);
 
-      if (!(await util.accessFile(dirname))) {
-        await util.mkdir(dirname);
-      } else if ((await util.statFile(dirname)).isFile()) {
+      if (!(await accessFile(dirname))) {
+        await mkdir(dirname);
+      } else if ((await statFile(dirname)).isFile()) {
         throw new Error(
           'Cannot create collection: "' + dirname + '" is not a directory'
         );
       }
 
-      await util.writeFile(path.join(dirname, self.indicatorFile), "");
+      await writeFile(joinPath(dirname, self.indicatorFile), "");
     },
 
     /**
@@ -59,7 +53,7 @@ function collectionFactory(ctx) {
      */
     async isCollection(dirname) {
       try {
-        return await util.accessFile(path.join(dirname, self.indicatorFile));
+        return await accessFile(joinPath(dirname, self.indicatorFile));
       } catch (e) {
         return false;
       }
@@ -75,11 +69,11 @@ function collectionFactory(ctx) {
      */
     async getRequests(dirname) {
       // TODO -- this should be recursing into subdirectories
-      const filesInCollection = await util.readDir(dirname);
+      const filesInCollection = await readDir(dirname);
       const requestFiles = [];
       for (const f of filesInCollection) {
         if (f === self.indicatorFile) continue;
-        if (await ctx.request.isRequest(path.join(dirname, f))) {
+        if (await ctx.request.isRequest(joinPath(dirname, f))) {
           requestFiles.push(f);
         }
       }

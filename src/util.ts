@@ -1,20 +1,18 @@
-const fs = require("fs"); // note -- avoiding .promises API, since it causes Node to throw warnings.
-const vm = require("vm");
-const path = require("path");
+import * as fs from "fs"; // note -- avoiding .promises API, since it causes Node to throw warnings.
 
 const { promisify } = require("util");
 
 const axios = require("axios");
 const ejsModule = require("ejs");
 
-const readFile = promisify(fs.readFile);
-const writeFile = promisify(fs.writeFile);
-const statFile = promisify(fs.stat);
-const readDir = promisify(fs.readdir);
-const mkdir = promisify(fs.mkdir);
+export const readFile = promisify(fs.readFile);
+export const writeFile = promisify(fs.writeFile);
+export const statFile = promisify(fs.stat);
+export const readDir = promisify(fs.readdir);
+export const mkdir = promisify(fs.mkdir);
 
 const _accessFile = promisify(fs.access);
-const accessFile = async (...args) => {
+export const accessFile = async (...args) => {
   try {
     await _accessFile(...args);
     return true;
@@ -23,22 +21,18 @@ const accessFile = async (...args) => {
   }
 };
 
-const getExecutionContext = (env, session, testContext) => {
-  return { ...env, repost: session, test: testContext };
-};
-
-const ejs = async (string, context) => {
+export const ejs = async (string, context) => {
   const data = await ejsModule.render(string, context, { async: true });
   return data;
 };
 
-const regexGroups = (regex, string) => {
+export const regexGroups = (regex, string) => {
   const match = regex.exec(string);
   if (!match) return [];
   return match.slice(1);
 };
 
-const awaitProps = async object => {
+export const awaitProps = async object => {
   if (object === null || typeof object !== "object")
     throw new Error("Cannot resolve properties of " + object);
   const result = {};
@@ -51,19 +45,19 @@ const awaitProps = async object => {
   return result;
 };
 
-const replaceExtension = (filename, newExt) => {
+export const replaceExtension = (filename, newExt) => {
   return filename.replace(/\.[^.]+?$/, newExt ? `${newExt}` : "");
 };
 
-const watchFile = (filename, fn) => {
+export const watchFile = (filename, fn) => {
   fs.watch(filename, { persistent: false }, fn);
 };
 
-const sendHTTPRequest = async request => {
+export const sendHTTPRequest = async request => {
   return await axios(request);
 };
 
-const sleep = async ms => {
+export const sleep = async ms => {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
   });
@@ -78,7 +72,7 @@ const sleep = async ms => {
  * @param {number} limit
  * @memberof module:repost/util
  */
-const split = (val, delimiter, limit) => {
+export const split = (val, delimiter, limit) => {
   const chunks = [];
   const delimiterLength = delimiter.length;
   let lastIndex = 0;
@@ -91,27 +85,4 @@ const split = (val, delimiter, limit) => {
 
   chunks.push(val.slice(lastIndex));
   return chunks;
-};
-
-/**
- * @module repost/util
- */
-module.exports = {
-  readFile,
-  writeFile,
-  statFile,
-  watchFile,
-  readDir,
-  mkdir,
-  accessFile,
-  ejs,
-  regexGroups,
-  awaitProps,
-  // awaitParallel,
-  // awaitSeries,
-  replaceExtension,
-  sendHTTPRequest,
-  getExecutionContext,
-  sleep,
-  split
 };

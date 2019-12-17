@@ -1,18 +1,19 @@
-const fs = require("fs");
-const path = require("path");
+import { readdirSync, statSync } from "fs";
+import { join as joinPath, basename, extname } from "path";
+import { readFile, ejs, sendHTTPRequest } from "../util";
 
-const util = require("../util");
+import { http } from "./http";
+import { js } from "./js";
 
-const FORMATS = requireFormats();
-
-module.exports = {
-  formatFactory
+const FORMATS = {
+  http,
+  js
 };
 
-function formatFactory(ctx) {
+export function formatFactory(ctx) {
   const self = {
     guessFormat(filename) {
-      const ext = path.extname(filename);
+      const ext = extname(filename);
       for (const fmt of Object.keys(FORMATS)) {
         if (FORMATS[fmt].config.extensions.includes(ext)) {
           return fmt;
@@ -41,14 +42,14 @@ function formatFactory(ctx) {
         throw new Error(`Format ${format} does not support parsing`);
       }
 
-      let content = await util.readFile(filename, "utf8");
+      let content = await readFile(filename, "utf8");
 
       if (FORMATS[format].config.ejs) {
-        content = await util.ejs(content, ctx);
+        content = await ejs(content, ctx);
       }
 
       const requestObject = FORMATS[format].parse(ctx, content);
-      if (!requestObject.handler) requestObject.handler = util.sendHTTPRequest;
+      if (!requestObject.handler) requestObject.handler = sendHTTPRequest;
 
       return requestObject;
     },
@@ -69,15 +70,12 @@ function formatFactory(ctx) {
 function requireFormats() {
   const fmts = {};
 
-  for (const dir of fs.readdirSync(__dirname)) {
-    const realdir = path.join(__dirname, dir);
-    if (!fs.statSync(realdir).isDirectory()) continue;
+  for (const dir of readdirSync(__dirname)) {
+    const realdir = joinPath(__dirname, dir);
+    if (!statSync(realdir).isDirectory()) continue;
     fmts[dir] = {};
-    for (const f of fs.readdirSync(realdir)) {
-      fmts[dir][path.basename(f, path.extname(f))] = require(path.join(
-        realdir,
-        f
-      ));
+    for (const f of readdirSync(realdir)) {
+      fmts[dir][basename(f, extname(f))] = require(joinPath(realdir, f));
     }
   }
 

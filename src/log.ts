@@ -1,17 +1,10 @@
 /**
- * @module repost/log
- */
-module.exports = {
-  loggerFactory
-};
-
-/**
  * Logger factory
  *
  * @param {RepostContext} ctx
  * @returns {Logger}
  */
-function loggerFactory(ctx) {
+export function loggerFactory(ctx) {
   const { config } = ctx;
 
   const log = (level, ...args) => {

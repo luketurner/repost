@@ -2,19 +2,20 @@
   "name": "repost",
   "version": "0.1.0",
   "description": "Low-friction, automation-friendly HTTP testing in the terminal",
-  "main": "index.js",
+  "main": "build/index.js",
   "bin": "bin/repost.js",
   "scripts": {
+    "build": "tsc",
     "cli": "node bin/repost.js",
     "debug": "node --inspect-brk bin/repost.js",
-    "test": "jest --config=test/jest.config.js",
+    "test": "jest",
     "test:watch": "npm run test -- --watch",
-    "docs": "rm -rf ./docs && jsdoc -c jsdoc.json",
+    "docs": "typedoc src",
     "docs:serve": "npm run docs && http-server ./docs -a localhost",
-    "docs:watch": "nodemon --watch src --watch tutorials --watch README.md -e js,md --exec \"npm run docs:serve\""
+    "docs:watch": "nodemon --watch src --watch tutorials --watch README.md -e ts,js,md --exec \"npm run docs:serve\""
   },
   "files": [
-    "src",
+    "build",
     "bin"
   ],
   "author": "Luke Turner",
@@ -28,12 +29,18 @@
     "lodash": "^4.17.15"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12.12.18",
     "axios-mock-adapter": "^1.17.0",
     "express": "^4.16.3",
     "http-server": "^0.11.1",
     "jest": "^24.9.0",
     "jsdoc": "^3.6.3",
     "mock-fs": "^4.10.1",
-    "nodemon": "^2.0.0"
+    "nodemon": "^2.0.0",
+    "ts-jest": "^24.2.0",
+    "typedoc": "^0.15.4",
+    "typescript": "^3.7.3"
   }
 }

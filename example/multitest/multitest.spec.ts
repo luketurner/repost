@@ -1,6 +1,4 @@
-const path = require("path");
-
-const { cli } = require("../..");
+import { cli } from "../../src";
 
 describe("example/multitest", () => {
   beforeAll(async () => {

@@ -1,6 +1,4 @@
-const path = require("path");
-
-const { cli, createContext } = require("../..");
+import { cli, createContext } from "../../src";
 
 describe("example/authentication", () => {
   beforeAll(async () => {
