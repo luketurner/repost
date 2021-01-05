@@ -20,7 +20,7 @@
   "author": "Luke Turner",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "cli-of-mine": "^2.1.0",
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.0.2",
