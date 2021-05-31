@@ -8,7 +8,7 @@
     "build": "tsc",
     "cli": "node bin/repost.js",
     "debug": "node --inspect-brk bin/repost.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "npm run test -- --watch",
     "docs": "typedoc src",
     "docs:serve": "npm run docs && http-server ./docs -a localhost",
