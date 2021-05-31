@@ -10,7 +10,7 @@ Low-friction, scriptable HTTP testing in the terminal. Inspired by Postman -- ye
 # install repost CLI from Github
 npm i -g luketurner/repost
 
-echo "GET https://luketurner.org HTTP/1.1\n\n" > example.http
+echo "GET https://luketurner.org HTTP/1.1\n" > example.http
 
 repost example.http
 ```
