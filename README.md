@@ -3,14 +3,14 @@
 Low-friction, scriptable HTTP testing in the terminal. Inspired by Postman -- yet ultimately, very different.
 
 - Save commonly-used HTTP requests as `.http` files and run them with: `repost foo.http`
-- Store shared variables in an `.env.json` file and reference them in your requests.
-- Create a `.hook.js` file to augment the request execution with custom JS code.
+- Store shared variables in an environment file and reference them in your requests.
+- Create a hook file to augment the request execution with custom JS code.
 
 ```bash
 # install repost CLI from Github
 npm i -g luketurner/repost
 
-echo "GET https://luketurner.org HTTP/1.1\n" > example.http
+echo "GET https://luketurner.org HTTP/1.1\n\n" > example.http
 
 repost example.http
 ```
