@@ -39,10 +39,15 @@ export interface Run {
   env: EnvironmentData;
 }
 
+export interface ExecutionConfig {
+  outputMode: OutputMode;
+}
+
 export interface Execution {
   runs: Run[];
   console: Console;
   context: JSExecutionContext;
+  config: ExecutionConfig;
 }
 
 export type OutputMode = 'extended' | 'json' | 'line';
@@ -79,10 +84,20 @@ export async function execRequest(
 ): Promise<[Response?, Error?]> {
   let response: Response | undefined;
   try {
-    response = await got<any>(request as any);
+    response = await got<any>({ ...request as any });
+    response = _.pick(response, [
+      'url', 'timings', 'statusCode', 'requestUrl', 'redirectUrls', 'ip',
+      'isFromCache', 'body', 'retryCount', 'method', 'headers', 'rawHeaders', 'trailers', 'rawTrailers',
+      'rawBody'
+    ]) as Response; // TODO -- should make real type here
     return [response, undefined];
   } catch (e) {
     if (e.response) response = e.response;
+    response = _.pick(response, [
+      'url', 'timings', 'statusCode', 'requestUrl', 'redirectUrls', 'ip',
+      'isFromCache', 'body', 'retryCount', 'method', 'headers', 'rawHeaders', 'trailers', 'rawTrailers',
+      'rawBody'
+    ]) as Response; // TODO -- should make real type here
     return [response, e];
   }
 }
@@ -303,7 +318,7 @@ export async function exec(execution: Execution): Promise<Execution> {
   let nextRun: Run | undefined;
   while (nextRun = getNextRun(execution)) {
     await execRun(nextRun!, execution);
-    execution.console.log(runToString(nextRun!));
+    execution.console.log(runToString(nextRun!, execution.config.outputMode));
   }
   return execution;
 }
@@ -319,7 +334,7 @@ export async function exec(execution: Execution): Promise<Execution> {
  */
 export function runToString(run: Run, outputMode: OutputMode = 'line'): string {
   if (outputMode === 'json') {
-    return JSON.stringify(run);
+    return JSON.stringify(_.omit(run, 'response.rawBody'));
   }
 
   const statusCode = run.response?.statusCode || "000";
@@ -381,12 +396,22 @@ export async function cli(configOverrides: any) {
           multiple: true,
           description: "Specifies a hook file to use.",
         },
-
+        {
+          name: "output",
+          alias: "o",
+          type: String,
+          description: "Specifies the output format to use. Supports 'line', 'json', 'extended'",
+          defaultValue: "line"
+        }
       ],
       handler: async (ctx) => {
-        const { file, env, hook } = ctx.args;
+        const { file, env, hook, output } = ctx.args;
         if (!file || !file.length) {
           throw new Error("No files specified.");
+        }
+
+        if (!['line', 'json', 'extended'].includes(output)) {
+          throw new Error(`Invalid output format: ${output}. Pick "line", "json", or "extended"`);
         }
 
         const execution = {
@@ -400,6 +425,9 @@ export async function cli(configOverrides: any) {
             env: {}
           })),
           console: ctx.console,
+          config: {
+            outputMode: output
+          },
           context: {
             // TODO -- populate execution context for JS stuff here
             setTimeout,

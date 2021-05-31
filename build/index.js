@@ -46,12 +46,22 @@ function execRequest(request) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
         try {
-            response = yield got_1.default(request);
+            response = yield got_1.default(Object.assign({}, request));
+            response = _.pick(response, [
+                'url', 'timings', 'statusCode', 'requestUrl', 'redirectUrls', 'ip',
+                'isFromCache', 'body', 'retryCount', 'method', 'headers', 'rawHeaders', 'trailers', 'rawTrailers',
+                'rawBody'
+            ]); // TODO -- should make real type here
             return [response, undefined];
         }
         catch (e) {
             if (e.response)
                 response = e.response;
+            response = _.pick(response, [
+                'url', 'timings', 'statusCode', 'requestUrl', 'redirectUrls', 'ip',
+                'isFromCache', 'body', 'retryCount', 'method', 'headers', 'rawHeaders', 'trailers', 'rawTrailers',
+                'rawBody'
+            ]); // TODO -- should make real type here
             return [response, e];
         }
     });
@@ -192,6 +202,16 @@ function loadRunEnvs(run, execution, additionalContext) {
     });
 }
 exports.loadRunEnvs = loadRunEnvs;
+/**
+ * Calls all the hooks with given hookType, passing them the args provided in ...args
+ *
+ * If multiple hooks are specified, will be called sequentially. Hook functions are awaited.
+ *
+ * @export
+ * @param runHook The RunHook object that contains the hooks
+ * @param hookType The type of hook to execute (e.g. "preparse")
+ * @param args Additional arguments to provide to the hook functions when called.
+ */
 function callHook(runHook, hookType, ...args) {
     return __awaiter(this, void 0, void 0, function* () {
         for (const fn of runHook[hookType] || [])
@@ -284,7 +304,7 @@ function exec(execution) {
         let nextRun;
         while (nextRun = getNextRun(execution)) {
             yield execRun(nextRun, execution);
-            execution.console.log(runToString(nextRun));
+            execution.console.log(runToString(nextRun, execution.config.outputMode));
         }
         return execution;
     });
@@ -302,7 +322,7 @@ exports.exec = exec;
 function runToString(run, outputMode = 'line') {
     var _a, _b, _c, _d, _e;
     if (outputMode === 'json') {
-        return JSON.stringify(run);
+        return JSON.stringify(_.omit(run, 'response.rawBody'));
     }
     const statusCode = ((_a = run.response) === null || _a === void 0 ? void 0 : _a.statusCode) || "000";
     const executionTime = (((_b = run.response) === null || _b === void 0 ? void 0 : _b.timings.end) || 0) - (((_c = run.response) === null || _c === void 0 ? void 0 : _c.timings.start) || 0);
@@ -356,10 +376,20 @@ function cli(configOverrides) {
                         multiple: true,
                         description: "Specifies a hook file to use.",
                     },
+                    {
+                        name: "output",
+                        alias: "o",
+                        type: String,
+                        description: "Specifies the output format to use. Supports 'line', 'json', 'extended'",
+                        defaultValue: "line"
+                    }
                 ], handler: (ctx) => __awaiter(this, void 0, void 0, function* () {
-                    const { file, env, hook } = ctx.args;
+                    const { file, env, hook, output } = ctx.args;
                     if (!file || !file.length) {
                         throw new Error("No files specified.");
+                    }
+                    if (!['line', 'json', 'extended'].includes(output)) {
+                        throw new Error(`Invalid output format: ${output}. Pick "line", "json", or "extended"`);
                     }
                     const execution = {
                         runs: file.map((f) => ({
@@ -372,6 +402,9 @@ function cli(configOverrides) {
                             env: {}
                         })),
                         console: ctx.console,
+                        config: {
+                            outputMode: output
+                        },
                         context: {
                             // TODO -- populate execution context for JS stuff here
                             setTimeout,

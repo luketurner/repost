@@ -20,10 +20,14 @@ export interface Run {
     hooks: RunHook;
     env: EnvironmentData;
 }
+export interface ExecutionConfig {
+    outputMode: OutputMode;
+}
 export interface Execution {
     runs: Run[];
     console: Console;
     context: JSExecutionContext;
+    config: ExecutionConfig;
 }
 export declare type OutputMode = 'extended' | 'json' | 'line';
 /**
@@ -113,6 +117,16 @@ export declare function loadRunHooks(run: Run, execution: Execution, additionalC
  * @returns
  */
 export declare function loadRunEnvs(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<Run>;
+/**
+ * Calls all the hooks with given hookType, passing them the args provided in ...args
+ *
+ * If multiple hooks are specified, will be called sequentially. Hook functions are awaited.
+ *
+ * @export
+ * @param runHook The RunHook object that contains the hooks
+ * @param hookType The type of hook to execute (e.g. "preparse")
+ * @param args Additional arguments to provide to the hook functions when called.
+ */
 export declare function callHook(runHook: RunHook, hookType: string, ...args: Parameters<RunHookFunction>): Promise<void>;
 /**
  * Accepts a Run object and executes it. Mutates the run in-place.
