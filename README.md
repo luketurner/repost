@@ -53,6 +53,8 @@ Hello, world!
 >
 > This means some HTTP features (e.g. Multipart, non-utf8 encodings) are not supported. Caveat emptor!
 
+For more usage examples, see the [example](example) directory.
+
 ## Output format
 
 By default, the `repost` CLI outputs results using a concise, line-oriented format.
