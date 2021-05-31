@@ -66,12 +66,21 @@ function loadJS(filePath, executionContext) {
     });
 }
 exports.loadJS = loadJS;
+function loadJSON(filePath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return JSON.parse(yield util_1.readFile(filePath, { encoding: 'utf8' }));
+    });
+}
+exports.loadJSON = loadJSON;
 function loadEnvironment(envPath, executionContext) {
     return __awaiter(this, void 0, void 0, function* () {
-        // TODO -- validate
-        const env = yield loadJS(envPath, executionContext);
+        const ext = path_1.extname(envPath);
+        if (!['.js', '.json'].includes(ext)) {
+            throw new Error(`Invalid environment file: ${envPath}. Must be a .js or .json file`);
+        }
+        const env = ext === '.js' ? yield loadJS(envPath, executionContext) : yield loadJSON(envPath);
         if (typeof env !== 'object' || env === null)
-            throw new Error(`Invalid environment file: ${envPath}. Must export a JS object.`);
+            throw new Error(`Invalid environment file: ${envPath}. Must export a JS or JSON object.`);
         return env;
     });
 }
@@ -81,7 +90,7 @@ function loadHook(hookPath, executionContext) {
         const hook = yield loadJS(hookPath, executionContext);
         if (typeof hook !== 'object' || hook === null)
             throw new Error(`Invalid hook file: ${hookPath}. Must export a JS object.`);
-        for (const [k, v] of Object.keys(hook)) {
+        for (const [k, v] of Object.entries(hook)) {
             if (!Array.isArray(v)) {
                 hook[k] = [v];
             } // convert single functions into arrays
@@ -107,22 +116,22 @@ exports.loadHook = loadHook;
  */
 function loadRunHooks(run, execution, additionalContext) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield run.hooks.reduce((hooks, path) => __awaiter(this, void 0, void 0, function* () {
+        return yield run.hookFiles.reduce((hooks, path) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const hook = yield loadHook(path, Object.assign(Object.assign({}, execution.context), additionalContext));
-                return _.mergeWith(yield hooks, hook, _.concat);
+                return _.assignWith(yield hooks, hook, (a, b) => a && b && _.concat(a, b) || undefined);
             }
             catch (e) {
                 execution.console.error(e);
                 return hooks;
             }
-        }), Promise.resolve({}));
+        }), {});
     });
 }
 exports.loadRunHooks = loadRunHooks;
 function loadRunEnvs(run, execution, additionalContext) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield run.envs.reduce((envs, path) => __awaiter(this, void 0, void 0, function* () {
+        return yield run.envFiles.reduce((envs, path) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const env = yield loadEnvironment(path, Object.assign(Object.assign({}, execution.context), additionalContext));
                 return Object.assign(Object.assign({}, (yield envs)), env);
@@ -131,7 +140,7 @@ function loadRunEnvs(run, execution, additionalContext) {
                 execution.console.error(e);
                 return envs;
             }
-        }), Promise.resolve({}));
+        }), {});
     });
 }
 exports.loadRunEnvs = loadRunEnvs;
@@ -156,33 +165,31 @@ exports.callHook = callHook;
  */
 function execRun(run, execution) {
     return __awaiter(this, void 0, void 0, function* () {
-        let environmentData = {};
-        let hooks = {};
         try {
             if (run.status === "pending") {
                 run.status = "running";
-                environmentData = yield loadRunEnvs(run, execution);
-                hooks = yield loadRunHooks(run, execution, environmentData);
-                callHook(hooks, 'preparse', run, execution);
-                const request = yield parseRequest(run.request, execution, Object.assign(Object.assign({}, environmentData), { hooks }));
-                callHook(hooks, 'postparse', run, execution);
-                callHook(hooks, 'preexec', run, execution);
+                run.env = yield loadRunEnvs(run, execution);
+                run.hooks = yield loadRunHooks(run, execution, run.env);
+                callHook(run.hooks, 'preparse', run, execution);
+                const request = yield parseRequest(run.request, execution, Object.assign(Object.assign({}, run.env), { hooks: run.hooks }));
+                callHook(run.hooks, 'postparse', run, execution);
+                callHook(run.hooks, 'preexec', run, execution);
                 const [response, error] = yield execRequest(request);
                 run.status = error ? "failed" : "succeeded";
                 run.response = response;
                 run.error = error;
-                callHook(hooks, 'postexec', run, execution);
-                callHook(hooks, error ? 'error' : 'success', run, execution);
+                callHook(run.hooks, 'postexec', run, execution);
+                callHook(run.hooks, error ? 'error' : 'success', run, execution);
             }
             return run;
         }
         catch (e) {
             run.status = "failed";
             run.error = e;
-            if (hooks)
-                callHook(hooks, 'postexec', run, execution);
-            if (hooks)
-                callHook(hooks, 'error', run, execution);
+            if (run.hooks)
+                callHook(run.hooks, 'postexec', run, execution);
+            if (run.hooks)
+                callHook(run.hooks, 'error', run, execution);
             throw e;
         }
     });
@@ -311,8 +318,10 @@ function cli(configOverrides) {
                             status: "pending",
                             name: f,
                             request: f,
-                            hooks: hook || [],
-                            envs: env || []
+                            hookFiles: hook || [],
+                            envFiles: env || [],
+                            hooks: {},
+                            env: {}
                         })),
                         console: ctx.console,
                         context: {

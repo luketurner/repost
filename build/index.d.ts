@@ -15,8 +15,10 @@ export interface Run {
     response?: Response;
     error?: Error;
     name: string;
-    hooks: Array<string>;
-    envs: Array<string>;
+    hookFiles: Array<string>;
+    envFiles: Array<string>;
+    hooks: RunHook;
+    env: EnvironmentData;
 }
 export interface Execution {
     runs: Run[];
@@ -49,6 +51,7 @@ export declare function getNextRun(execution: Execution): Run | undefined;
  */
 export declare function execRequest(request: Request): Promise<[Response?, Error?]>;
 export declare function loadJS(filePath: string, executionContext: JSExecutionContext): Promise<unknown>;
+export declare function loadJSON(filePath: string): Promise<unknown>;
 export declare function loadEnvironment(envPath: string, executionContext: JSExecutionContext): Promise<EnvironmentData>;
 export declare function loadHook(hookPath: string, executionContext: JSExecutionContext): Promise<RunHook>;
 /**

@@ -33,8 +33,10 @@ export interface Run {
   response?: Response;
   error?: Error;
   name: string;
-  hooks: Array<string>;
-  envs: Array<string>;
+  hookFiles: Array<string>;
+  envFiles: Array<string>;
+  hooks: RunHook;
+  env: EnvironmentData;
 }
 
 export interface Execution {
@@ -92,10 +94,17 @@ export async function loadJS(filePath: string, executionContext: JSExecutionCont
   })();
 }
 
+export async function loadJSON(filePath: string): Promise<unknown> {
+  return JSON.parse(await readFile(filePath, { encoding: 'utf8' }))
+}
+
 export async function loadEnvironment(envPath: string, executionContext: JSExecutionContext): Promise<EnvironmentData> {
-  // TODO -- validate
-  const env = await loadJS(envPath, executionContext);
-  if (typeof env !== 'object' || env === null) throw new Error(`Invalid environment file: ${envPath}. Must export a JS object.`);
+  const ext = extname(envPath);
+  if (!['.js', '.json'].includes(ext)) {
+    throw new Error(`Invalid environment file: ${envPath}. Must be a .js or .json file`);
+  }
+  const env = ext === '.js' ? await loadJS(envPath, executionContext) : await loadJSON(envPath);
+  if (typeof env !== 'object' || env === null) throw new Error(`Invalid environment file: ${envPath}. Must export a JS or JSON object.`);
   return env as EnvironmentData;
 
 }
@@ -103,7 +112,7 @@ export async function loadEnvironment(envPath: string, executionContext: JSExecu
 export async function loadHook(hookPath: string, executionContext: JSExecutionContext): Promise<RunHook> {
   const hook = await loadJS(hookPath, executionContext) as Record<string, any>;
   if (typeof hook !== 'object' || hook === null) throw new Error(`Invalid hook file: ${hookPath}. Must export a JS object.`);
-  for (const [k, v] of Object.keys(hook)) {
+  for (const [k, v] of Object.entries(hook)) {
     if (!Array.isArray(v)) { hook[k] = [v]; } // convert single functions into arrays
     for (const f of hook[k]) {
       if (typeof f !== 'function') throw new Error(`Invalid hook file: ${hookPath}. Hooks must be functions.`);
@@ -124,19 +133,19 @@ export async function loadHook(hookPath: string, executionContext: JSExecutionCo
  * @returns {Promise<RunHook>} A Promise for the resulting RunHook object.
  */
 export async function loadRunHooks(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<RunHook> {
-  return await run.hooks.reduce(async (hooks, path) => {
+  return await run.hookFiles.reduce(async (hooks, path) => {
     try {
       const hook = await loadHook(path, {...execution.context, ...additionalContext});
-      return _.mergeWith(await hooks, hook, _.concat);
+      return _.assignWith(await hooks, hook, (a, b) => a && b && _.concat(a, b) || undefined);
     } catch (e) {
       execution.console.error(e);
       return hooks;
     }
-  }, Promise.resolve({} as RunHook));
+  }, {});
 }
 
 export async function loadRunEnvs(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<EnvironmentData> {
-  return await run.envs.reduce(async (envs, path) => {
+  return await run.envFiles.reduce(async (envs, path) => {
     try {
       const env = await loadEnvironment(path, {...execution.context, ...additionalContext});
       return { ...(await envs), ...env }
@@ -144,7 +153,7 @@ export async function loadRunEnvs(run: Run, execution: Execution, additionalCont
       execution.console.error(e);
       return envs;
     }
-  }, Promise.resolve({} as EnvironmentData));
+  }, {});
 }
 
 export async function callHook(runHook: RunHook, hookType: string, ...args: Parameters<RunHookFunction>) {
@@ -164,35 +173,33 @@ export async function callHook(runHook: RunHook, hookType: string, ...args: Para
  * @returns {Promise<void>} A promise that will resolve with the run. If there was errors, the promise will reject.
  */
 export async function execRun(run: Run, execution: Execution): Promise<Run> {
-  let environmentData: EnvironmentData = {};
-  let hooks: RunHook = {};
   try {
     if (run.status === "pending") {
       run.status = "running";
 
-      environmentData = await loadRunEnvs(run, execution);
-      hooks = await loadRunHooks(run, execution, environmentData);
+      run.env = await loadRunEnvs(run, execution);
+      run.hooks = await loadRunHooks(run, execution, run.env);
 
-      callHook(hooks, 'preparse', run, execution);
-      const request = await parseRequest(run.request, execution, { ...environmentData, hooks });
-      callHook(hooks, 'postparse', run, execution);
+      callHook(run.hooks, 'preparse', run, execution);
+      const request = await parseRequest(run.request, execution, { ...run.env, hooks: run.hooks });
+      callHook(run.hooks, 'postparse', run, execution);
 
-      callHook(hooks, 'preexec', run, execution);
+      callHook(run.hooks, 'preexec', run, execution);
 
       const [response, error] = await execRequest(request);
       run.status = error ? "failed" : "succeeded";
       run.response = response;
       run.error = error;
 
-      callHook(hooks, 'postexec', run, execution);
-      callHook(hooks, error ? 'error' : 'success', run, execution);
+      callHook(run.hooks, 'postexec', run, execution);
+      callHook(run.hooks, error ? 'error' : 'success', run, execution);
     }
     return run;
   } catch (e) {
     run.status = "failed";
     run.error = e;
-    if (hooks) callHook(hooks, 'postexec', run, execution);
-    if (hooks) callHook(hooks, 'error', run, execution);
+    if (run.hooks) callHook(run.hooks, 'postexec', run, execution);
+    if (run.hooks) callHook(run.hooks, 'error', run, execution);
     throw e;
   }
 }
@@ -328,8 +335,10 @@ export async function cli(configOverrides: any) {
             status: "pending",
             name: f,
             request: f,
-            hooks: hook || [],
-            envs: env || []
+            hookFiles: hook || [],
+            envFiles: env || [],
+            hooks: {},
+            env: {}
           })),
           console: ctx.console,
           context: {
