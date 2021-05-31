@@ -7,6 +7,7 @@ import got, {
 import { exec as cliExec } from "cli-of-mine";
 import { extname } from "path";
 import { readFile, ejs } from "./util";
+import * as util from "./util";
 import { parseHttpRequest } from "./http";
 import { compileFunction, createContext } from "vm";
 
@@ -430,7 +431,8 @@ export async function cli(configOverrides: any) {
           },
           context: {
             // TODO -- populate execution context for JS stuff here
-            setTimeout,
+            ...util,
+            ...module.exports
           }
         };
 
