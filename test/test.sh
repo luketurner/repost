@@ -5,21 +5,26 @@ npm run build
 echo "01-simple"
 cd example/01-simple
 repost request.http
-cd -
+cd ../..
 
 echo "02-environments-json"
 cd example/02-environments-json
 repost request.http -e env.json
-cd -
+cd ../..
 
 echo "03-environments-js"
 cd example/03-environments-js
 repost request.http -e env.js
-cd -
+cd ../..
 
 echo "04-hooks"
 cd example/04-hooks
 repost request.http -H hook.js
-cd -
+cd ../..
+
+echo "05-hooks-async"
+cd example/05-hooks-async
+repost request.http -H hook.js
+cd ../..
 
 echo "done"

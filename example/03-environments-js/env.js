@@ -1,3 +1,7 @@
-const root_url = "https://github.com"
-
-return { root_url }
+// Example of an environment that includes functions, not just data.
+return {
+    method: 'GET',
+    root_url() {
+        return "https://github.com"
+    }
+}
