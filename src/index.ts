@@ -87,6 +87,14 @@ export async function execRequest(
   }
 }
 
+/**
+ * Reads a .js file and executes the contents in a separate context. Returns a Promise for whatever
+ * value is returned by the JS object.
+ * 
+ * @param filePath Path to JS
+ * @param executionContext Object to use for execution context
+ * @returns A Promise for whatever value was returned by the loaded JS
+ */
 export async function loadJS(filePath: string, executionContext: JSExecutionContext): Promise<unknown> {
   const content = await readFile(filePath, { encoding: 'utf8' });
   return await compileFunction(content, [], {
@@ -94,10 +102,23 @@ export async function loadJS(filePath: string, executionContext: JSExecutionCont
   })();
 }
 
+/**
+ * Reads a .json file and parses the contents into a JSON object. Returns a Promise for the parsd JSON.
+ * 
+ * @param filePath Path to parse
+ * @returns A Promise for whatever value was present in the .json file
+ */
 export async function loadJSON(filePath: string): Promise<unknown> {
   return JSON.parse(await readFile(filePath, { encoding: 'utf8' }))
 }
 
+/**
+ * Loads an environment from given file (which may be JS or JSON). Returns the environment data.
+ * 
+ * @param envPath The path to the environment file
+ * @param executionContext An object to use as context when loading JS environments
+ * @returns 
+ */
 export async function loadEnvironment(envPath: string, executionContext: JSExecutionContext): Promise<EnvironmentData> {
   const ext = extname(envPath);
   if (!['.js', '.json'].includes(ext)) {
@@ -109,6 +130,14 @@ export async function loadEnvironment(envPath: string, executionContext: JSExecu
 
 }
 
+/**
+ * Loads a hook file, returning a Promise for the resulting RunHook object.
+ * 
+ * @export
+ * @param hookPath The path of the hook file to load
+ * @param executionContext An object to use as context when loading the hook file
+ * @returns 
+ */
 export async function loadHook(hookPath: string, executionContext: JSExecutionContext): Promise<RunHook> {
   const hook = await loadJS(hookPath, executionContext) as Record<string, any>;
   if (typeof hook !== 'object' || hook === null) throw new Error(`Invalid hook file: ${hookPath}. Must export a JS object.`);
@@ -125,6 +154,8 @@ export async function loadHook(hookPath: string, executionContext: JSExecutionCo
  * Loads all the hooks for a given run. If multiple files specify functions for the same hook type,
  * the function lists are all concatenated together.
  * 
+ * This mutates run.hooks and returns the mutated Run. Note that existing hooks will be retained.
+ * 
  * If any files cannot be loaded, this logs those errors using the execution logger.
  *
  * @export
@@ -132,8 +163,8 @@ export async function loadHook(hookPath: string, executionContext: JSExecutionCo
  * @param {Record<string, any>} hookContext The execution context for the hooks
  * @returns {Promise<RunHook>} A Promise for the resulting RunHook object.
  */
-export async function loadRunHooks(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<RunHook> {
-  return await run.hookFiles.reduce(async (hooks, path) => {
+export async function loadRunHooks(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<Run> {
+  run.hooks = await run.hookFiles.reduce(async (hooks, path) => {
     try {
       const hook = await loadHook(path, {...execution.context, ...additionalContext});
       return _.assignWith(await hooks, hook, (a, b) => a && b && _.concat(a, b) || undefined);
@@ -141,11 +172,28 @@ export async function loadRunHooks(run: Run, execution: Execution, additionalCon
       execution.console.error(e);
       return hooks;
     }
-  }, {});
+  }, Promise.resolve(run.hooks));
+  return run;
 }
 
-export async function loadRunEnvs(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<EnvironmentData> {
-  return await run.envFiles.reduce(async (envs, path) => {
+
+/**
+ * Loads all the environment files for a given Run. Mutates the Run by setting run.env, then
+ * returns the mutated Run.
+ * 
+ * Note that any environment values already set in the run will be retained (unless the key
+ * is overwritten by one of the loaded environments.)
+ * 
+ * If any files cannot be loaded, this logs those errors using the execution logger.
+ * 
+ * @export
+ * @param run The run to load environments for
+ * @param execution The Execution for the run
+ * @param additionalContext Additional context for JS executed when loading environments
+ * @returns 
+ */
+export async function loadRunEnvs(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<Run> {
+  run.env = await run.envFiles.reduce(async (envs, path) => {
     try {
       const env = await loadEnvironment(path, {...execution.context, ...additionalContext});
       return { ...(await envs), ...env }
@@ -153,9 +201,20 @@ export async function loadRunEnvs(run: Run, execution: Execution, additionalCont
       execution.console.error(e);
       return envs;
     }
-  }, {});
+  }, Promise.resolve(run.env));
+  return run;
 }
 
+/**
+ * Calls all the hooks with given hookType, passing them the args provided in ...args
+ * 
+ * If multiple hooks are specified, will be called sequentially. Hook functions are awaited.
+ * 
+ * @export
+ * @param runHook The RunHook object that contains the hooks 
+ * @param hookType The type of hook to execute (e.g. "preparse")
+ * @param args Additional arguments to provide to the hook functions when called.
+ */
 export async function callHook(runHook: RunHook, hookType: string, ...args: Parameters<RunHookFunction>) {
   for (const fn of runHook[hookType] || []) await fn(...args);
 }
@@ -177,29 +236,29 @@ export async function execRun(run: Run, execution: Execution): Promise<Run> {
     if (run.status === "pending") {
       run.status = "running";
 
-      run.env = await loadRunEnvs(run, execution);
-      run.hooks = await loadRunHooks(run, execution, run.env);
+      await loadRunEnvs(run, execution);
+      await loadRunHooks(run, execution, run.env);
 
-      callHook(run.hooks, 'preparse', run, execution);
+      await callHook(run.hooks, 'preparse', run, execution);
       const request = await parseRequest(run.request, execution, { ...run.env, hooks: run.hooks });
-      callHook(run.hooks, 'postparse', run, execution);
+      await callHook(run.hooks, 'postparse', run, execution);
 
-      callHook(run.hooks, 'preexec', run, execution);
+      await callHook(run.hooks, 'preexec', run, execution);
 
       const [response, error] = await execRequest(request);
       run.status = error ? "failed" : "succeeded";
       run.response = response;
       run.error = error;
 
-      callHook(run.hooks, 'postexec', run, execution);
-      callHook(run.hooks, error ? 'error' : 'success', run, execution);
+      await callHook(run.hooks, 'postexec', run, execution);
+      await callHook(run.hooks, error ? 'error' : 'success', run, execution);
     }
     return run;
   } catch (e) {
     run.status = "failed";
     run.error = e;
-    if (run.hooks) callHook(run.hooks, 'postexec', run, execution);
-    if (run.hooks) callHook(run.hooks, 'error', run, execution);
+    if (run.hooks) await callHook(run.hooks, 'postexec', run, execution);
+    if (run.hooks) await callHook(run.hooks, 'error', run, execution);
     throw e;
   }
 }
@@ -343,6 +402,7 @@ export async function cli(configOverrides: any) {
           console: ctx.console,
           context: {
             // TODO -- populate execution context for JS stuff here
+            setTimeout,
           }
         };
 

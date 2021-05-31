@@ -50,13 +50,44 @@ export declare function getNextRun(execution: Execution): Run | undefined;
  * @returns {Promise<[Response?, Error?]>} A tuple of the response and error (if any).
  */
 export declare function execRequest(request: Request): Promise<[Response?, Error?]>;
+/**
+ * Reads a .js file and executes the contents in a separate context. Returns a Promise for whatever
+ * value is returned by the JS object.
+ *
+ * @param filePath Path to JS
+ * @param executionContext Object to use for execution context
+ * @returns A Promise for whatever value was returned by the loaded JS
+ */
 export declare function loadJS(filePath: string, executionContext: JSExecutionContext): Promise<unknown>;
+/**
+ * Reads a .json file and parses the contents into a JSON object. Returns a Promise for the parsd JSON.
+ *
+ * @param filePath Path to parse
+ * @returns A Promise for whatever value was present in the .json file
+ */
 export declare function loadJSON(filePath: string): Promise<unknown>;
+/**
+ * Loads an environment from given file (which may be JS or JSON). Returns the environment data.
+ *
+ * @param envPath The path to the environment file
+ * @param executionContext An object to use as context when loading JS environments
+ * @returns
+ */
 export declare function loadEnvironment(envPath: string, executionContext: JSExecutionContext): Promise<EnvironmentData>;
+/**
+ * Loads a hook file, returning a Promise for the resulting RunHook object.
+ *
+ * @export
+ * @param hookPath The path of the hook file to load
+ * @param executionContext An object to use as context when loading the hook file
+ * @returns
+ */
 export declare function loadHook(hookPath: string, executionContext: JSExecutionContext): Promise<RunHook>;
 /**
  * Loads all the hooks for a given run. If multiple files specify functions for the same hook type,
  * the function lists are all concatenated together.
+ *
+ * This mutates run.hooks and returns the mutated Run. Note that existing hooks will be retained.
  *
  * If any files cannot be loaded, this logs those errors using the execution logger.
  *
@@ -65,8 +96,23 @@ export declare function loadHook(hookPath: string, executionContext: JSExecution
  * @param {Record<string, any>} hookContext The execution context for the hooks
  * @returns {Promise<RunHook>} A Promise for the resulting RunHook object.
  */
-export declare function loadRunHooks(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<RunHook>;
-export declare function loadRunEnvs(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<EnvironmentData>;
+export declare function loadRunHooks(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<Run>;
+/**
+ * Loads all the environment files for a given Run. Mutates the Run by setting run.env, then
+ * returns the mutated Run.
+ *
+ * Note that any environment values already set in the run will be retained (unless the key
+ * is overwritten by one of the loaded environments.)
+ *
+ * If any files cannot be loaded, this logs those errors using the execution logger.
+ *
+ * @export
+ * @param run The run to load environments for
+ * @param execution The Execution for the run
+ * @param additionalContext Additional context for JS executed when loading environments
+ * @returns
+ */
+export declare function loadRunEnvs(run: Run, execution: Execution, additionalContext?: JSExecutionContext): Promise<Run>;
 export declare function callHook(runHook: RunHook, hookType: string, ...args: Parameters<RunHookFunction>): Promise<void>;
 /**
  * Accepts a Run object and executes it. Mutates the run in-place.
