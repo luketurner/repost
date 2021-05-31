@@ -3,6 +3,7 @@
  *
  * contains HTTP request/response format handling
  */
-export declare const printHttpRequest: (request: import("got/dist/source").Options) => string;
-export declare const parseHttpRequest: (httpRequest: string) => import("got/dist/source").Options;
+import { Request } from ".";
+export declare const printHttpRequest: (request: Request) => string;
+export declare const parseHttpRequest: (httpRequest: string) => Request;
 //# sourceMappingURL=http.d.ts.map

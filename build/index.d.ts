@@ -31,6 +31,20 @@ export interface Execution {
 }
 export declare type OutputMode = 'extended' | 'json' | 'line';
 /**
+ * Creates a new Run object with given parameters.
+ *
+ * @param newRun The parameters for the run. Only `request` is required.
+ * @returns A fully-populated, valid Run object
+ */
+export declare function createRun(newRun: Partial<Run>): Run;
+/**
+ * Given parameters for a new Run, creates the Run and adds it to the provided Execution.
+ * @param execution The execution to add run to
+ * @param run Parameters for the run to add (only `request` is required)
+ * @returns The Run that was created
+ */
+export declare function addRun(execution: Execution, runParams: Partial<Run>): Run;
+/**
  * Returns the next run that will be executed for a given Execution.
  *
  * Only runs with status "pending" are eligible for execution.

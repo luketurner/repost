@@ -53,6 +53,38 @@ export interface Execution {
 
 export type OutputMode = 'extended' | 'json' | 'line';
 
+
+/**
+ * Creates a new Run object with given parameters.
+ * 
+ * @param newRun The parameters for the run. Only `request` is required.
+ * @returns A fully-populated, valid Run object
+ */
+export function createRun(newRun: Partial<Run>): Run {
+  if (!newRun.request) throw new Error('Invalid run: Must include request property');
+  return {
+    request:   newRun.request,
+    status:    newRun.status    || "pending",
+    name:      newRun.name      || newRun.request,
+    hookFiles: newRun.hookFiles || [],
+    envFiles:  newRun.envFiles  || [],
+    hooks:     newRun.hooks     || {},
+    env:       newRun.env       || {}
+  };
+}
+
+/**
+ * Given parameters for a new Run, creates the Run and adds it to the provided Execution.
+ * @param execution The execution to add run to
+ * @param run Parameters for the run to add (only `request` is required)
+ * @returns The Run that was created
+ */
+export function addRun(execution: Execution, runParams: Partial<Run>): Run {
+  const run = createRun(runParams)
+  execution.runs.push(run);
+  return run;
+}
+
 /**
  * Returns the next run that will be executed for a given Execution.
  * 
@@ -416,15 +448,7 @@ export async function cli(configOverrides: any) {
         }
 
         const execution = {
-          runs: file.map((f: string) => ({
-            status: "pending",
-            name: f,
-            request: f,
-            hookFiles: hook || [],
-            envFiles: env || [],
-            hooks: {},
-            env: {}
-          })),
+          runs: [],
           console: ctx.console,
           config: {
             outputMode: output
@@ -435,6 +459,13 @@ export async function cli(configOverrides: any) {
             ...module.exports
           }
         };
+
+        for (const f of file) addRun(execution, {
+          name: f,
+          request: f,
+          hookFiles: hook,
+          envFiles: env
+        });
 
         await exec(execution);
       },

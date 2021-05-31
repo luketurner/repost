@@ -9,13 +9,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.cli = exports.runToString = exports.exec = exports.parseRequest = exports.execRun = exports.callHook = exports.loadRunEnvs = exports.loadRunHooks = exports.loadHook = exports.loadEnvironment = exports.loadJSON = exports.loadJS = exports.execRequest = exports.getNextRun = exports.addRun = exports.createRun = void 0;
 const _ = require("lodash");
 const got_1 = require("got");
 const cli_of_mine_1 = require("cli-of-mine");
 const path_1 = require("path");
 const util_1 = require("./util");
+const util = require("./util");
 const http_1 = require("./http");
 const vm_1 = require("vm");
+/**
+ * Creates a new Run object with given parameters.
+ *
+ * @param newRun The parameters for the run. Only `request` is required.
+ * @returns A fully-populated, valid Run object
+ */
+function createRun(newRun) {
+    if (!newRun.request)
+        throw new Error('Invalid run: Must include request property');
+    return {
+        request: newRun.request,
+        status: newRun.status || "pending",
+        name: newRun.name || newRun.request,
+        hookFiles: newRun.hookFiles || [],
+        envFiles: newRun.envFiles || [],
+        hooks: newRun.hooks || {},
+        env: newRun.env || {}
+    };
+}
+exports.createRun = createRun;
+/**
+ * Given parameters for a new Run, creates the Run and adds it to the provided Execution.
+ * @param execution The execution to add run to
+ * @param run Parameters for the run to add (only `request` is required)
+ * @returns The Run that was created
+ */
+function addRun(execution, runParams) {
+    const run = createRun(runParams);
+    execution.runs.push(run);
+    return run;
+}
+exports.addRun = addRun;
 /**
  * Returns the next run that will be executed for a given Execution.
  *
@@ -236,12 +270,19 @@ function execRun(run, execution) {
         try {
             if (run.status === "pending") {
                 run.status = "running";
+                const abortRun = () => { run.status = "pending"; return run; };
                 yield loadRunEnvs(run, execution);
                 yield loadRunHooks(run, execution, run.env);
                 yield callHook(run.hooks, 'preparse', run, execution);
+                if (getNextRun(execution) !== run)
+                    return abortRun();
                 const request = yield parseRequest(run.request, execution, Object.assign(Object.assign({}, run.env), { hooks: run.hooks }));
                 yield callHook(run.hooks, 'postparse', run, execution);
+                if (getNextRun(execution) !== run)
+                    return abortRun();
                 yield callHook(run.hooks, 'preexec', run, execution);
+                if (getNextRun(execution) !== run)
+                    return abortRun();
                 const [response, error] = yield execRequest(request);
                 run.status = error ? "failed" : "succeeded";
                 run.response = response;
@@ -392,24 +433,20 @@ function cli(configOverrides) {
                         throw new Error(`Invalid output format: ${output}. Pick "line", "json", or "extended"`);
                     }
                     const execution = {
-                        runs: file.map((f) => ({
-                            status: "pending",
-                            name: f,
-                            request: f,
-                            hookFiles: hook || [],
-                            envFiles: env || [],
-                            hooks: {},
-                            env: {}
-                        })),
+                        runs: [],
                         console: ctx.console,
                         config: {
                             outputMode: output
                         },
-                        context: {
-                            // TODO -- populate execution context for JS stuff here
-                            setTimeout,
-                        }
+                        context: Object.assign(Object.assign({}, util), module.exports)
                     };
+                    for (const f of file)
+                        addRun(execution, {
+                            name: f,
+                            request: f,
+                            hookFiles: hook,
+                            envFiles: env
+                        });
                     yield exec(execution);
                 }) }, configOverrides));
         }

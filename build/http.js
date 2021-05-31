@@ -5,6 +5,7 @@
  * contains HTTP request/response format handling
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseHttpRequest = exports.printHttpRequest = void 0;
 const util_1 = require("./util");
 class RequestParseError extends Error {
     constructor(fieldName, value, context) {
