@@ -117,4 +117,4 @@ npm run debug       # Runs the repost CLI with --inspect-brk
 
 ---
 
-Copyright 2019 Luke Turner - Published under the MIT License.
+Copyright 2021 Luke Turner - Published under the MIT License.
