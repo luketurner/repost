@@ -23,7 +23,7 @@
   "dependencies": {
     "cli-of-mine": "^2.1.0",
     "ejs": "^2.6.1",
-    "got": "^11.5.1",
+    "got": "^11.8.5",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
